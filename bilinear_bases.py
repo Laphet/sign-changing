@@ -62,7 +62,7 @@ def get_loc_mass(loc_ind_i: int, loc_ind_j: int):
         quad_cord_y, quad_wght_y = QUAD_CORD[quad_ind_y], QUAD_WGHT[quad_ind_y]
         val_i = get_locbase_val(loc_ind_i, quad_cord_x, quad_cord_y)
         val_j = get_locbase_val(loc_ind_j, quad_cord_x, quad_cord_y)
-        val += 0.25 * val_i * val_j * quad_wght_x * quad_wght_y
+        val += 0.25 * 1.0 * 1.0 * val_i * val_j * quad_wght_x * quad_wght_y
     return val
 
 

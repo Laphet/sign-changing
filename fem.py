@@ -40,7 +40,7 @@ def get_fem_mat(coeff: np.ndarray):
     fem_mat_coo = coo_matrix(
         (VV[:marker], (II[:marker], JJ[:marker])), shape=(tot_dof, tot_dof)
     )
-    return fem_mat_coo.tocsc()
+    return fem_mat_coo.tocsr()
 
 
 def get_fem_rhs(source: np.ndarray):
@@ -56,55 +56,24 @@ def get_fem_rhs(source: np.ndarray):
     return rhs
 
 
-def get_test_settings(fine_grids: int, sigma_pm):
-    coeff = np.zeros((fine_grids, fine_grids))
-    source = np.zeros((fine_grids, fine_grids))
-    tot_dof = (fine_grids - 1) ** 2
-    u = np.zeros((tot_dof,))
-    h = 1.0 / fine_grids
-    l = 0.5 - 1.0 / 32
-    for elem_ind_x, elem_ind_y in product(range(fine_grids), range(fine_grids)):
-        x, y = (elem_ind_x + 0.5) * h, (elem_ind_y + 0.5) * h
-        if y >= l:
-            coeff[elem_ind_x, elem_ind_y] = -sigma_pm[1]
-        else:
-            coeff[elem_ind_x, elem_ind_y] = sigma_pm[0]
-        source[elem_ind_x, elem_ind_y] = (
-            sigma_pm[0]
-            * sigma_pm[1]
-            * (
-                2.0 * y * (y - 1.0) * (y - l)
-                + x * (x - 1.0) * (6.0 * y - 2.0 * (l + 1.0))
-            )
-        )
-    for dof_ind_y, dof_ind_x in product(range(fine_grids - 1), range(fine_grids - 1)):
-        x, y = (dof_ind_x + 1) * h, (dof_ind_y + 1) * h
-        temp = x * (x - 1) * y * (y - 1) * (y - l)
-        if y >= l:
-            u[dof_ind_y * (fine_grids - 1) + dof_ind_x] = temp * sigma_pm[0]
-        else:
-            u[dof_ind_y * (fine_grids - 1) + dof_ind_x] = -temp * sigma_pm[1]
-
-    coeff_abs = np.abs(coeff)
-    fem_mat = get_fem_mat(coeff)
-    rhs = get_fem_rhs(source)
-    fem_mat_abs = get_fem_mat(coeff_abs)
-    return fem_mat, rhs, u, fem_mat_abs
-
-
 if __name__ == "__main__":
+    from simple_flat_interface_settings import get_test_settings
+
     sigma_pm_list = [[10.0, 1.0], [100.0, 1.0], [1000.0, 1.0], [1.0e4, 1.0]]
-    fine_grids_list = [32, 64, 128, 256, 512]
-    rela_errors = np.zeros((len(fine_grids_list), len(sigma_pm_list)))
-    for fine_grids_ind, sigma_pm_ind in product(
-        range(len(fine_grids_list)), range(len(sigma_pm_list))
+    fine_grid_list = [32, 64, 128, 256, 512]
+    rela_errors = np.zeros((len(fine_grid_list), len(sigma_pm_list)))
+    for fine_grid_ind, sigma_pm_ind in product(
+        range(len(fine_grid_list)), range(len(sigma_pm_list))
     ):
-        fine_grids = fine_grids_list[fine_grids_ind]
+        fine_grid = fine_grid_list[fine_grid_ind]
         sigma_pm = sigma_pm_list[sigma_pm_ind]
-        fem_mat, rhs, u, fem_mat_abs = get_test_settings(fine_grids, sigma_pm)
+        coeff, source, u = get_test_settings(fine_grid, sigma_pm)
+        fem_mat = get_fem_mat(coeff)
+        rhs = get_fem_rhs(source)
+        fem_mat_abs = get_fem_mat(np.abs(coeff))
         u_fem = spsolve(fem_mat, rhs)
         delta_u = u - u_fem
         u_nrm2 = np.sqrt(np.dot(fem_mat_abs.dot(u), u))
         delta_u_nrm2 = np.sqrt(np.dot(fem_mat_abs.dot(delta_u), delta_u))
-        rela_errors[fine_grids_ind, sigma_pm_ind] = delta_u_nrm2 / u_nrm2
+        rela_errors[fine_grid_ind, sigma_pm_ind] = delta_u_nrm2 / u_nrm2
     print(rela_errors)
