@@ -67,8 +67,8 @@ def get_loc_mass(loc_ind_i: int, loc_ind_j: int):
 
 
 elem_Laplace_stiff_mat = np.zeros((N_V, N_V))
-elem_Bilinear_mass_mat = np.zeros((N_V, N_V))
+elem_bilinear_mass_mat = np.zeros((N_V, N_V))
 
 for loc_ind_i, loc_ind_j in product(range(N_V), range(N_V)):
     elem_Laplace_stiff_mat[loc_ind_i, loc_ind_j] = get_loc_stiff(loc_ind_i, loc_ind_j)
-    elem_Bilinear_mass_mat[loc_ind_i, loc_ind_j] = get_loc_mass(loc_ind_i, loc_ind_j)
+    elem_bilinear_mass_mat[loc_ind_i, loc_ind_j] = get_loc_mass(loc_ind_i, loc_ind_j)

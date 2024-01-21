@@ -1,5 +1,5 @@
 import numpy as np
-from scipy.sparse import coo_matrix
+from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import spsolve
 import bilinear_bases as BB
 from itertools import product
@@ -37,10 +37,10 @@ def get_fem_mat(coeff: np.ndarray):
                 VV[marker] = elem_stiff_mat[loc_ind_row, loc_ind_col]
                 marker += 1
     tot_dof = (coeff.shape[0] - 1) * (coeff.shape[1] - 1)
-    fem_mat_coo = coo_matrix(
+    fem_mat = csr_matrix(
         (VV[:marker], (II[:marker], JJ[:marker])), shape=(tot_dof, tot_dof)
     )
-    return fem_mat_coo.tocsr()
+    return fem_mat
 
 
 def get_fem_rhs(source: np.ndarray):
@@ -56,11 +56,39 @@ def get_fem_rhs(source: np.ndarray):
     return rhs
 
 
+def get_mass_mat(weight: np.ndarray):
+    h_x, h_y = 1.0 / (weight.shape[0]), 1.0 / (weight.shape[1])
+    max_data_len = weight.shape[0] * weight.shape[1] * BB.N_V**2
+    II = -np.ones((max_data_len,), dtype=np.int32)
+    JJ = -np.ones((max_data_len,), dtype=np.int32)
+    VV = np.zeros((max_data_len,))
+    marker = 0
+    for elem_ind_x, elem_ind_y in product(
+        range(weight.shape[0]), range(weight.shape[1])
+    ):
+        elem_mass_mat = (
+            weight[elem_ind_x, elem_ind_y] * BB.elem_bilinear_mass_mat * h_x * h_y
+        )
+        for loc_ind_row, loc_ind_col in product(range(BB.N_V), range(BB.N_V)):
+            dof_ind_row = get_dof_ind(elem_ind_x, elem_ind_y, loc_ind_row, weight.shape)
+            dof_ind_col = get_dof_ind(elem_ind_x, elem_ind_y, loc_ind_col, weight.shape)
+            if dof_ind_row >= 0 and dof_ind_col >= 0:
+                II[marker] = dof_ind_row
+                JJ[marker] = dof_ind_col
+                VV[marker] = elem_mass_mat[loc_ind_row, loc_ind_col]
+                marker += 1
+    tot_dof = (weight.shape[0] - 1) * (weight.shape[1] - 1)
+    mass_mat = csr_matrix(
+        (VV[:marker], (II[:marker], JJ[:marker])), shape=(tot_dof, tot_dof)
+    )
+    return mass_mat
+
+
 if __name__ == "__main__":
     from simple_flat_interface_settings import get_test_settings
 
-    sigma_pm_list = [[10.0, 1.0], [100.0, 1.0], [1000.0, 1.0], [1.0e4, 1.0]]
-    fine_grid_list = [32, 64, 128, 256, 512]
+    sigma_pm_list = [[1.0, -1.0]]
+    fine_grid_list = [8]
     rela_errors = np.zeros((len(fine_grid_list), len(sigma_pm_list)))
     for fine_grid_ind, sigma_pm_ind in product(
         range(len(fine_grid_list)), range(len(sigma_pm_list))

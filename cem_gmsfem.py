@@ -1,5 +1,4 @@
 import numpy as np
-from scipy.sparse import coo_matrix
 from scipy.sparse import csr_matrix
 from scipy.sparse.linalg import spsolve
 from scipy.sparse.linalg import eigsh
@@ -10,40 +9,6 @@ import logging
 
 
 class CEM_GMSFEM:
-    # in __init__()
-    fine_grid = -1
-    coarse_grid = -1
-    sub_grid = -1
-    coarse_elem = -1
-    sub_elem = -1
-    tot_node = -1
-    h = 0.0
-    eigen_num = -1
-    oversamp_layer = -1
-    tot_fd_num = -1
-    coeff = None
-    coeff_abs = None
-    kappa = None
-    kappa_abs = None
-    # in get_eigen_pair()
-    eigen_val = None
-    eigen_vec = None
-    S_abs_mat_list = None
-    S_mat_list = None
-    # in get_ind_map()
-    ind_map_list = None
-    ind_map_rev_list = None
-    loc_fd_num = None
-    # in get_corr_basis()
-    basis_list = None
-    # in get_glb_A()
-    glb_A = None
-    # in get_glb_basis_spmat()
-    glb_basis_spmat = None
-    glb_basis_spmat_T = None
-    # in setup()
-    A_ms = None
-
     def __init__(
         self,
         coarse_grid: int,
@@ -68,6 +33,26 @@ class CEM_GMSFEM:
         self.coeff_abs = np.abs(self.coeff)
         self.kappa = 24.0 * self.coarse_grid**2 * self.coeff
         self.kappa_abs = np.abs(self.kappa)
+        # in get_eigen_pair()
+        self.eigen_vec = np.zeros(
+            ((self.sub_grid + 1) ** 2, self.coarse_elem * self.eigen_num)
+        )
+        self.eigen_val = np.zeros((self.coarse_elem * self.eigen_num,))
+        self.S_abs_mat_list = [None] * self.coarse_elem
+        self.S_mat_list = [None] * self.coarse_elem
+        # in get_ind_map()
+        self.ind_map_list = [None] * self.coarse_elem
+        self.ind_map_rev_list = [None] * self.coarse_elem
+        self.loc_fd_num = np.zeros((self.coarse_elem,), dtype=np.int32)
+        # in get_ms_basis()
+        self.basis_list = [None] * self.coarse_elem
+        # in get_glb_A()
+        self.glb_A = None
+        # in get_glb_basis_spmat()
+        self.glb_basis_spmat = None
+        self.glb_basis_spmat_T = None
+        # in setup()
+        self.A_ms = None
 
     def get_coarse_ngh_elem_lim(self, coarse_elem_ind):
         coarse_elem_ind_y, coarse_elem_ind_x = divmod(coarse_elem_ind, self.coarse_grid)
@@ -88,10 +73,6 @@ class CEM_GMSFEM:
 
     def get_eigen_pair(self):
         fd_num = (self.sub_grid + 1) ** 2
-        self.eigen_vec = np.zeros((fd_num, self.coarse_elem * self.eigen_num))
-        self.eigen_val = np.zeros((self.coarse_elem * self.eigen_num,))
-        self.S_abs_mat_list = [None] * self.coarse_elem
-        self.S_mat_list = [None] * self.coarse_elem
         for coarse_elem_ind_y, coarse_elem_ind_x in product(
             range(self.coarse_grid), range(self.coarse_grid)
         ):
@@ -129,28 +110,25 @@ class CEM_GMSFEM:
                     S_abs_val[marker] = (
                         self.h**2
                         * loc_kappa_abs
-                        * BB.elem_Bilinear_mass_mat[loc_ind_row, loc_ind_col]
+                        * BB.elem_bilinear_mass_mat[loc_ind_row, loc_ind_col]
                     )
                     S_val[marker] = (
                         self.h**2
                         * loc_kappa
-                        * BB.elem_Bilinear_mass_mat[loc_ind_row, loc_ind_col]
+                        * BB.elem_bilinear_mass_mat[loc_ind_row, loc_ind_col]
                     )
                     marker += 1
 
-            A_abs_mat = coo_matrix(
+            A_abs_mat = csr_matrix(
                 (A_abs_val[:marker], (II[:marker], JJ[:marker])), shape=(fd_num, fd_num)
             )
-            S_abs_mat = coo_matrix(
+            S_abs_mat = csr_matrix(
                 (S_abs_val[:marker], (II[:marker], JJ[:marker])), shape=(fd_num, fd_num)
             )
-            S_mat = coo_matrix(
+            S_mat = csr_matrix(
                 (S_val[:marker], (II[:marker], JJ[:marker])), shape=(fd_num, fd_num)
             )
 
-            A_abs_mat = A_abs_mat.tocsr()
-            S_abs_mat = S_abs_mat.tocsr()
-            S_mat = S_mat.tocsr()
             val, vec = eigsh(
                 A_abs_mat, k=self.eigen_num, M=S_abs_mat, sigma=-1.0, which="LM"
             )
@@ -186,13 +164,8 @@ class CEM_GMSFEM:
         return node_ind, is_bdry_node
 
     def get_ind_map(self):
-        # assert self.oversamp_layer > 0
-        self.ind_map_list = [None] * self.coarse_elem
-        self.ind_map_rev_list = [None] * self.coarse_elem
         # A list of ind_map, ind_map[coarse_elem_ind] is the ind_map
         # and the reverse map list
-        self.loc_fd_num = np.zeros((self.coarse_elem,), dtype=np.int32)
-        # The number of freedom degrees of local problems
         for coarse_elem_ind in range(self.coarse_elem):
             # Get the mapping ind_map_dic[glb_node_ind] = loc_fd_ind
             # and the reverse mapping ind_map_rev_dic[loc_fd_ind] = glb_node_ind
@@ -229,7 +202,7 @@ class CEM_GMSFEM:
     def get_ms_basis(self):
         # assert self.oversamp_layer > 0 and self.eigen_num > 0
         # assert len(self.ind_map_list) > 0
-        self.basis_list = [None] * self.coarse_elem
+
         max_data_len = (2 * self.oversamp_layer + 1) ** 2 * (
             (self.sub_grid + 1) ** 4 + self.sub_elem * BB.N_V**2
         )
@@ -324,10 +297,10 @@ class CEM_GMSFEM:
                                         BB.elem_Laplace_stiff_mat[loc_ind_i, loc_ind_j]
                                     )
                                     marker += 1
-            Op_mat = coo_matrix(
+            Op_mat = csr_matrix(
                 (VV[:marker], (II[:marker], JJ[:marker])), shape=(fd_num, fd_num)
             )
-            Op_mat = Op_mat.tocsr()
+            # Op_mat = Op_mat.tocsr()
             # assert info == 0
             basis_wrt_coarse_elem = np.zeros(rhs_basis.shape)
             for eigen_ind in range(self.eigen_num):
@@ -364,11 +337,10 @@ class CEM_GMSFEM:
                 VV[marker] = elem_stiff_mat[loc_ind_i, loc_ind_j]
                 marker += 1
 
-        self.glb_A_mat = coo_matrix(
+        self.glb_A = csr_matrix(
             (VV[:marker], (II[:marker], JJ[:marker])),
             shape=(self.tot_node, self.tot_node),
         )
-        self.glb_A_mat = self.glb_A_mat.tocsr()
 
     def get_glb_basis_spmat(self):
         max_data_len = np.sum(self.loc_fd_num) * self.eigen_num
@@ -390,10 +362,7 @@ class CEM_GMSFEM:
             (VV[:marker], (II[:marker], JJ[:marker])),
             shape=(self.tot_node, self.tot_fd_num),
         )
-        self.glb_basis_spmat_T = csr_matrix(
-            (VV[:marker], (JJ[:marker], II[:marker])),
-            shape=(self.tot_fd_num, self.tot_node),
-        )
+        self.glb_basis_spmat_T = self.glb_basis_spmat.transpose().tocsr()
 
     def setup(self):
         self.get_eigen_pair()
@@ -408,10 +377,30 @@ class CEM_GMSFEM:
         logging.info("Finish getting the global stiffness matrix.")
         self.get_glb_basis_spmat()
         logging.info("Finish collecting all the bases in a sparse matrix formation.")
-        self.A_ms = self.glb_basis_spmat_T * self.glb_A_mat * self.glb_basis_spmat
+        self.A_ms = self.glb_basis_spmat_T * self.glb_A * self.glb_basis_spmat
         logging.info("Finish constructing the final MS mat.")
 
-    def solve(self, source):
+        logging.info(
+            "CEM-GMsFEM settings: fine_grid={0:d}, coarse_grid={1:d}, eigen_num={2:d}, oversamp_layer={3:d}.".format(
+                self.fine_grid, self.coarse_grid, self.eigen_num, self.oversamp_layer
+            )
+        )
+        eigen_val_minmax = self.eigen_val.reshape((self.coarse_elem, self.eigen_num))
+        eigen_min_range = (
+            np.min(np.min(eigen_val_minmax, axis=1)),
+            np.max(np.min(eigen_val_minmax, axis=1)),
+        )
+        eigen_max_range = (
+            np.min(np.max(eigen_val_minmax, axis=1)),
+            np.max(np.max(eigen_val_minmax, axis=1)),
+        )
+        logging.info(
+            "lambda_min=({0:.4e}, {1:.4e}), lambda_max=({2:.4e}, {3:.4e})".format(
+                *eigen_min_range, *eigen_max_range
+            )
+        )
+
+    def get_glb_rhs(self, source):
         glb_rhs = np.zeros((self.tot_node,))
         for fine_elem_ind_x, fine_elem_ind_y, loc_ind in product(
             range(self.fine_grid), range(self.fine_grid), range(BB.N_V)
@@ -423,6 +412,10 @@ class CEM_GMSFEM:
                 glb_rhs[node_ind] += (
                     0.25 * self.h**2 * source[fine_elem_ind_x, fine_elem_ind_y]
                 )
+        return glb_rhs
+
+    def solve(self, source):
+        glb_rhs = self.get_glb_rhs(source)
         rhs = self.glb_basis_spmat_T.dot(glb_rhs)
         omega = spsolve(self.A_ms, rhs)
         u_ext = self.glb_basis_spmat.dot(omega)
@@ -430,10 +423,52 @@ class CEM_GMSFEM:
         u = u_ext[1:-1, 1:-1]
         return u.reshape((-1,))
 
+    def solve_by_coarse_bilinear(self, source):
+        tot_dof = (self.coarse_grid - 1) ** 2
+        max_data_len = tot_dof * (2 * self.sub_grid - 1) ** 2
+        II = -np.ones((max_data_len,), dtype=np.int32)
+        JJ = -np.ones((max_data_len,), dtype=np.int32)
+        VV = np.zeros((max_data_len,))
+        marker = 0
+        for dof_ind_y, dof_ind_x in product(
+            range(self.coarse_grid - 1), range(self.coarse_grid - 1)
+        ):
+            dof_ind = dof_ind_y * (self.coarse_grid - 1) + dof_ind_x
+            basis_node_ind_x = (dof_ind_x + 1) * self.sub_grid
+            basis_node_ind_y = (dof_ind_y + 1) * self.sub_grid
+            node_ind_x_lf_lim = dof_ind_x * self.sub_grid + 1
+            node_ind_x_rg_lim = (dof_ind_x + 2) * self.sub_grid
+            node_ind_y_dw_lim = dof_ind_y * self.sub_grid + 1
+            node_ind_y_up_lim = (dof_ind_y + 2) * self.sub_grid
+            for node_ind_y, node_ind_x in product(
+                range(node_ind_y_dw_lim, node_ind_y_up_lim),
+                range(node_ind_x_lf_lim, node_ind_x_rg_lim),
+            ):
+                II[marker] = node_ind_y * (self.fine_grid + 1) + node_ind_x
+                JJ[marker] = dof_ind
+                VV[marker] = 1.0 - abs(node_ind_x - basis_node_ind_x) / self.sub_grid
+                VV[marker] *= 1.0 - abs(node_ind_y - basis_node_ind_y) / self.sub_grid
+                marker += 1
+        coarse_basis_spmat = csr_matrix(
+            (VV[:marker], (II[:marker], JJ[:marker])), shape=(self.tot_node, tot_dof)
+        )
+
+        coarse_basis_spmat_T = coarse_basis_spmat.transpose().tocsr()
+        A_Q1 = coarse_basis_spmat_T * self.glb_A * coarse_basis_spmat
+
+        glb_rhs = self.get_glb_rhs(source)
+        rhs = coarse_basis_spmat_T.dot(glb_rhs)
+
+        omega = spsolve(A_Q1, rhs)
+        u_ext = coarse_basis_spmat.dot(omega)
+        u_ext = u_ext.reshape((self.fine_grid + 1, self.fine_grid + 1))
+        u = u_ext[1:-1, 1:-1]
+        return u.reshape((-1,))
+
 
 if __name__ == "__main__":
     from simple_flat_interface_settings import get_test_settings
-    from fem import get_fem_mat
+    from fem import get_fem_mat, get_mass_mat
 
     import os
     from logging import config
@@ -445,25 +480,44 @@ if __name__ == "__main__":
     logging.info("=" * 80)
     logging.info("Start")
 
-    sigma_pm = [10.0, 1.0]
-    fine_grid = 64
-    coarse_grid_list = [8, 16, 32, 64]
-    osly_list = [1, 2, 3, 4]
+    sigma_pm = [1.0, -1.0]
+    fine_grid = 8
+    coarse_grid_list = [8]
+    osly_list = [1]
     eigen_num = 3
-    rela_errors = np.zeros((len(coarse_grid_list), len(osly_list)))
+    rela_errors_h1 = np.zeros((len(coarse_grid_list), len(osly_list)))
+    rela_errors_l2 = np.zeros(rela_errors_h1.shape)
 
     for coarse_grid_ind, osly_ind in product(
         range(len(coarse_grid_list)), range(len(osly_list))
     ):
+        coeff, source, u = get_test_settings(fine_grid, sigma_pm)
+
         coarse_grid = coarse_grid_list[coarse_grid_ind]
         osly = osly_list[osly_ind]
-        coeff, source, u = get_test_settings(fine_grid, sigma_pm)
         cem_gmsfem = CEM_GMSFEM(coarse_grid, eigen_num, osly, coeff)
         cem_gmsfem.setup()
         u_cem = cem_gmsfem.solve(source)
+
         fem_mat_abs = get_fem_mat(np.abs(coeff))
+        mass_mat = get_mass_mat(np.ones(coeff.shape))
         delta_u = u - u_cem
-        u_nrm2 = np.sqrt(np.dot(fem_mat_abs.dot(u), u))
-        delta_u_nrm2 = np.sqrt(np.dot(fem_mat_abs.dot(delta_u), delta_u))
-        rela_errors[coarse_grid_ind, osly_ind] = delta_u_nrm2 / u_nrm2
-    print(rela_errors)
+
+        u_h1 = np.sqrt(np.dot(fem_mat_abs.dot(u), u))
+        delta_u_h1 = np.sqrt(np.dot(fem_mat_abs.dot(delta_u), delta_u))
+        rela_error_h1 = delta_u_h1 / u_h1
+        rela_errors_h1[coarse_grid_ind, osly_ind] = rela_error_h1
+
+        u_l2 = np.sqrt(np.dot(mass_mat.dot(u), u))
+        delta_u_l2 = np.sqrt(np.dot(mass_mat.dot(delta_u), delta_u))
+        rela_error_l2 = delta_u_l2 / u_l2
+        rela_errors_l2[coarse_grid_ind, osly_ind] = rela_error_l2
+
+        logging.info(
+            "relative energy error={0:4e}, plain-L2 error={1:4e}.".format(
+                rela_error_h1, rela_error_l2
+            )
+        )
+
+    print(rela_errors_h1)
+    print(rela_errors_l2)
