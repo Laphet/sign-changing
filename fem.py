@@ -87,8 +87,8 @@ def get_mass_mat(weight: np.ndarray):
 if __name__ == "__main__":
     from simple_flat_interface_settings import get_test_settings
 
-    sigma_pm_list = [[1.0, -1.0]]
-    fine_grid_list = [8]
+    sigma_pm_list = [[10.0, 1.0]]
+    fine_grid_list = [8, 16, 32, 64]
     rela_errors = np.zeros((len(fine_grid_list), len(sigma_pm_list)))
     for fine_grid_ind, sigma_pm_ind in product(
         range(len(fine_grid_list)), range(len(sigma_pm_list))

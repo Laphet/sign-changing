@@ -1,10 +1,8 @@
 import numpy as np
 from itertools import product
 
-l = 0.5 - 1.0 / 128
 
-
-def get_test_settings(fine_grids: int, sigma_pm):
+def get_test_settings(fine_grids: int, sigma_pm, l=0.25):
     coeff = np.zeros((fine_grids, fine_grids))
     source = np.zeros((fine_grids, fine_grids))
     tot_dof = (fine_grids - 1) ** 2
@@ -13,9 +11,9 @@ def get_test_settings(fine_grids: int, sigma_pm):
     for elem_ind_x, elem_ind_y in product(range(fine_grids), range(fine_grids)):
         x, y = (elem_ind_x + 0.5) * h, (elem_ind_y + 0.5) * h
         if y >= l:
-            coeff[elem_ind_x, elem_ind_y] = -sigma_pm[1]
-        else:
             coeff[elem_ind_x, elem_ind_y] = sigma_pm[0]
+        else:
+            coeff[elem_ind_x, elem_ind_y] = -sigma_pm[1]
         source[elem_ind_x, elem_ind_y] = (
             sigma_pm[0]
             * sigma_pm[1]
@@ -28,9 +26,9 @@ def get_test_settings(fine_grids: int, sigma_pm):
         x, y = (dof_ind_x + 1) * h, (dof_ind_y + 1) * h
         temp = x * (x - 1) * y * (y - 1) * (y - l)
         if y >= l:
-            u[dof_ind_y * (fine_grids - 1) + dof_ind_x] = temp * sigma_pm[0]
-        else:
             u[dof_ind_y * (fine_grids - 1) + dof_ind_x] = -temp * sigma_pm[1]
+        else:
+            u[dof_ind_y * (fine_grids - 1) + dof_ind_x] = temp * sigma_pm[0]
 
     return coeff, source, u
 
@@ -45,26 +43,31 @@ if __name__ == "__main__":
     fine_grid = 256
     coarse_grid_list = [8, 16, 32, 64]
     osly_list = [0, 1, 2, 3, 4]
-    sigma_pm_list = [[2.0, 1.0], [20.0, 1.0], [200.0, 1.0], [2000.0, 1.0]]
+    sigma_pm_list = [[1.1, 1.0], [1.0, 1.1], [1.01, 1.0], [1.0, 1.01]]
+    l_list = [5.0, 5.0 - 1.0 / 128]
 
     parse = argparse.ArgumentParser()
     parse.add_argument("--en", default=3, type=int)
-    parse.add_argument("--sigma", default=2, type=int)
+    parse.add_argument("--sigma", default=0, type=int)
+    parse.add_argument("--posi", default=0, type=int)
     args = parse.parse_args()
     config.fileConfig(
         "settings/log.conf",
         defaults={
-            "logfilename": "logs/flat-interface-en{0:d}-sigma{1:d}.log".format(
-                args.en, args.sigma
+            "logfilename": "logs/flat-interface-en{0:d}-sigma{1:d}-l{2:d}.log".format(
+                args.en, args.sigma, args.posi
             )
         },
     )
     eigen_num = args.en
     sigma_pm = sigma_pm_list[args.sigma]
+    l = l_list[args.posi]
 
     logging.info("=" * 80)
     logging.info("Start")
-    logging.info("In the medium, sigma+={0:.4e}, sigma-={1:.4e}".format(*sigma_pm))
+    logging.info(
+        "In the medium, sigma+={0:.4e}, sigma-={1:.4e}, l={2:.4e}".format(*sigma_pm, l)
+    )
 
     rela_errors_h1 = np.zeros((len(coarse_grid_list), len(osly_list)))
     rela_errors_l2 = np.zeros(rela_errors_h1.shape)
