@@ -1,6 +1,8 @@
 import numpy as np
 from itertools import product
 
+l = 0.5 - 1.0 / 128
+
 
 def get_test_settings(fine_grids: int, sigma_pm):
     coeff = np.zeros((fine_grids, fine_grids))
@@ -8,7 +10,6 @@ def get_test_settings(fine_grids: int, sigma_pm):
     tot_dof = (fine_grids - 1) ** 2
     u = np.zeros((tot_dof,))
     h = 1.0 / fine_grids
-    l = 0.5 - 1.0 / 32
     for elem_ind_x, elem_ind_y in product(range(fine_grids), range(fine_grids)):
         x, y = (elem_ind_x + 0.5) * h, (elem_ind_y + 0.5) * h
         if y >= l:
