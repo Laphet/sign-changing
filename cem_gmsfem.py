@@ -8,7 +8,7 @@ from itertools import product
 import logging
 
 
-class CEM_GMSFEM:
+class CemGmsfem:
     def __init__(
         self,
         coarse_grid: int,
@@ -33,6 +33,11 @@ class CEM_GMSFEM:
         self.coeff_abs = np.abs(self.coeff)
         self.kappa = 24.0 * self.coarse_grid**2 * self.coeff
         self.kappa_abs = np.abs(self.kappa)
+        logging.info(
+            "CEM-GMsFEM uses fine_grid={0:d}, coarse_grid={1:d}, eigen_num={2:d}, oversamp_layer={3:d}".format(
+                self.fine_grid, self.coarse_grid, self.eigen_num, self.oversamp_layer
+            )
+        )
         # in get_eigen_pair()
         self.eigen_vec = np.zeros(
             ((self.sub_grid + 1) ** 2, self.coarse_elem * self.eigen_num)
@@ -495,7 +500,7 @@ if __name__ == "__main__":
 
         coarse_grid = coarse_grid_list[coarse_grid_ind]
         osly = osly_list[osly_ind]
-        cem_gmsfem = CEM_GMSFEM(coarse_grid, eigen_num, osly, coeff)
+        cem_gmsfem = CemGmsfem(coarse_grid, eigen_num, osly, coeff)
         cem_gmsfem.setup()
         u_cem = cem_gmsfem.solve(source)
 

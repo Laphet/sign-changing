@@ -32,3 +32,77 @@ def get_test_settings(fine_grids: int, sigma_pm):
             u[dof_ind_y * (fine_grids - 1) + dof_ind_x] = -temp * sigma_pm[1]
 
     return coeff, source, u
+
+
+if __name__ == "__main__":
+    from cem_gmsfem import CemGmsfem
+    from fem import get_fem_mat, get_mass_mat
+    import argparse
+    import logging
+    from logging import config
+
+    fine_grid = 256
+    coarse_grid_list = [8, 16, 32, 64]
+    osly_list = [0, 1, 2, 3, 4]
+    sigma_pm_list = [[2.0, 1.0], [20.0, 1.0], [200.0, 1.0], [2000.0, 1.0]]
+
+    parse = argparse.ArgumentParser()
+    parse.add_argument("--en", default=3, type=int)
+    parse.add_argument("--sigma", default=2, type=int)
+    args = parse.parse_args()
+    config.fileConfig(
+        "settings/log.conf",
+        defaults={
+            "logfilename": "logs/flat-interface-en{0:d}-sigma{1:d}.log".format(
+                args.en, args.sigma
+            )
+        },
+    )
+    eigen_num = args.en
+    sigma_pm = sigma_pm_list[args.sigma]
+
+    logging.info("=" * 80)
+    logging.info("Start")
+    logging.info("In the medium, sigma+={0:.4e}, sigma-={1:.4e}".format(*sigma_pm))
+
+    rela_errors_h1 = np.zeros((len(coarse_grid_list), len(osly_list)))
+    rela_errors_l2 = np.zeros(rela_errors_h1.shape)
+
+    for coarse_grid_ind, osly_ind in product(
+        range(len(coarse_grid_list)), range(len(osly_list))
+    ):
+        coeff, source, u = get_test_settings(fine_grid, sigma_pm)
+
+        coarse_grid = coarse_grid_list[coarse_grid_ind]
+        osly = osly_list[osly_ind]
+        cem_gmsfem = CemGmsfem(coarse_grid, eigen_num, osly, coeff)
+        cem_gmsfem.setup()
+        u_cem = None
+        if osly == 0:
+            u_cem = cem_gmsfem.solve_by_coarse_bilinear(source)
+        else:
+            u_cem = cem_gmsfem.solve(source)
+
+        fem_mat_abs = get_fem_mat(cem_gmsfem.coeff_abs)
+        mass_mat = get_mass_mat(np.ones(coeff.shape))
+
+        delta_u = u - u_cem
+
+        u_h1 = np.sqrt(np.dot(fem_mat_abs.dot(u), u))
+        delta_u_h1 = np.sqrt(np.dot(fem_mat_abs.dot(delta_u), delta_u))
+        rela_error_h1 = delta_u_h1 / u_h1
+        rela_errors_h1[coarse_grid_ind, osly_ind] = rela_error_h1
+
+        u_l2 = np.sqrt(np.dot(mass_mat.dot(u), u))
+        delta_u_l2 = np.sqrt(np.dot(mass_mat.dot(delta_u), delta_u))
+        rela_error_l2 = delta_u_l2 / u_l2
+        rela_errors_l2[coarse_grid_ind, osly_ind] = rela_error_l2
+
+        logging.info(
+            "relative energy error={0:6e}, plain-L2 error={1:6e}.".format(
+                rela_error_h1, rela_error_l2
+            )
+        )
+
+    print(rela_errors_h1)
+    print(rela_errors_l2)
