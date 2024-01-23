@@ -370,40 +370,51 @@ class CemGmsfem:
         self.glb_basis_spmat_T = self.glb_basis_spmat.transpose().tocsr()
 
     def setup(self):
-        self.get_eigen_pair()
-        logging.info("Finish getting all eigenvalue-vector pairs.")
-        self.get_ind_map()
-        logging.info(
-            "Finish getting maps of [global node index] to [local freedom index]."
-        )
-        self.get_ms_basis()
-        logging.info("Finish getting the multiscale bases.")
         self.get_glb_A()
         logging.info("Finish getting the global stiffness matrix.")
-        self.get_glb_basis_spmat()
-        logging.info("Finish collecting all the bases in a sparse matrix formation.")
-        self.A_ms = self.glb_basis_spmat_T * self.glb_A * self.glb_basis_spmat
-        logging.info("Finish constructing the final MS mat.")
+        if self.oversamp_layer >= 1:
+            self.get_eigen_pair()
+            logging.info("Finish getting all eigenvalue-vector pairs.")
+            eigen_val_minmax = self.eigen_val.reshape(
+                (self.coarse_elem, self.eigen_num)
+            )
+            eigen_min_range = (
+                np.min(np.min(eigen_val_minmax, axis=1)),
+                np.max(np.min(eigen_val_minmax, axis=1)),
+            )
+            eigen_max_range = (
+                np.min(np.max(eigen_val_minmax, axis=1)),
+                np.max(np.max(eigen_val_minmax, axis=1)),
+            )
+            logging.info(
+                "lambda_min=({0:.4e}, {1:.4e}), lambda_max=({2:.4e}, {3:.4e})".format(
+                    *eigen_min_range, *eigen_max_range
+                )
+            )
 
-        logging.info(
-            "CEM-GMsFEM settings: fine_grid={0:d}, coarse_grid={1:d}, eigen_num={2:d}, oversamp_layer={3:d}.".format(
-                self.fine_grid, self.coarse_grid, self.eigen_num, self.oversamp_layer
+            self.get_ind_map()
+            logging.info(
+                "Finish getting maps of [global node index] to [local freedom index]."
             )
-        )
-        eigen_val_minmax = self.eigen_val.reshape((self.coarse_elem, self.eigen_num))
-        eigen_min_range = (
-            np.min(np.min(eigen_val_minmax, axis=1)),
-            np.max(np.min(eigen_val_minmax, axis=1)),
-        )
-        eigen_max_range = (
-            np.min(np.max(eigen_val_minmax, axis=1)),
-            np.max(np.max(eigen_val_minmax, axis=1)),
-        )
-        logging.info(
-            "lambda_min=({0:.4e}, {1:.4e}), lambda_max=({2:.4e}, {3:.4e})".format(
-                *eigen_min_range, *eigen_max_range
+            self.get_ms_basis()
+            logging.info("Finish getting the multiscale bases.")
+
+            self.get_glb_basis_spmat()
+            logging.info(
+                "Finish collecting all the bases in a sparse matrix formation."
             )
-        )
+
+            self.A_ms = self.glb_basis_spmat_T * self.glb_A * self.glb_basis_spmat
+            logging.info("Finish constructing the final MS mat.")
+
+            logging.info(
+                "CEM-GMsFEM settings: fine_grid={0:d}, coarse_grid={1:d}, eigen_num={2:d}, oversamp_layer={3:d}.".format(
+                    self.fine_grid,
+                    self.coarse_grid,
+                    self.eigen_num,
+                    self.oversamp_layer,
+                )
+            )
 
     def get_glb_rhs(self, source):
         glb_rhs = np.zeros((self.tot_node,))
@@ -486,9 +497,9 @@ if __name__ == "__main__":
     logging.info("Start")
 
     sigma_pm = [1.0, -1.0]
-    fine_grid = 8
+    fine_grid = 32
     coarse_grid_list = [8]
-    osly_list = [1]
+    osly_list = [0]
     eigen_num = 3
     rela_errors_h1 = np.zeros((len(coarse_grid_list), len(osly_list)))
     rela_errors_l2 = np.zeros(rela_errors_h1.shape)
@@ -502,7 +513,10 @@ if __name__ == "__main__":
         osly = osly_list[osly_ind]
         cem_gmsfem = CemGmsfem(coarse_grid, eigen_num, osly, coeff)
         cem_gmsfem.setup()
-        u_cem = cem_gmsfem.solve(source)
+        if cem_gmsfem.oversamp_layer >= 1:
+            u_cem = cem_gmsfem.solve(source)
+        else:
+            u_cem = cem_gmsfem.solve_by_coarse_bilinear(source)
 
         fem_mat_abs = get_fem_mat(np.abs(coeff))
         mass_mat = get_mass_mat(np.ones(coeff.shape))
