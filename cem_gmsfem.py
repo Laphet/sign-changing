@@ -407,15 +407,6 @@ class CemGmsfem:
             self.A_ms = self.glb_basis_spmat_T * self.glb_A * self.glb_basis_spmat
             logging.info("Finish constructing the final MS mat.")
 
-            logging.info(
-                "CEM-GMsFEM settings: fine_grid={0:d}, coarse_grid={1:d}, eigen_num={2:d}, oversamp_layer={3:d}.".format(
-                    self.fine_grid,
-                    self.coarse_grid,
-                    self.eigen_num,
-                    self.oversamp_layer,
-                )
-            )
-
     def get_glb_rhs(self, source):
         glb_rhs = np.zeros((self.tot_node,))
         for fine_elem_ind_x, fine_elem_ind_y, loc_ind in product(
