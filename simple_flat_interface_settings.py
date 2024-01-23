@@ -54,7 +54,7 @@ if __name__ == "__main__":
     config.fileConfig(
         "settings/log.conf",
         defaults={
-            "logfilename": "logs/flat-interface-en{0:d}-sigma{1:d}-l{2:d}.log".format(
+            "logfilename": "logs/flat-interface-en{0:d}-sigma{1:d}-l{2:d}-asus.log".format(
                 args.en, args.sigma, args.posi
             )
         },
