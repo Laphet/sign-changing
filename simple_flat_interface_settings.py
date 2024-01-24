@@ -40,9 +40,11 @@ if __name__ == "__main__":
     import logging
     from logging import config
 
+    # fine_grid = 256
+    # coarse_grid_list = [8, 16, 32, 64]
     fine_grid = 400
     coarse_grid_list = [10, 20, 40, 80]
-    osly_list = [0, 1, 2, 3, 4]
+    osly_list = [3, 4]
     sigma_pm_list = [[1.1, 1.0], [1.0, 1.1], [1.01, 1.0], [1.0, 1.01]]
     l_list = [5.0, 5.0 - 1.0 / 128]
 
@@ -54,7 +56,7 @@ if __name__ == "__main__":
     config.fileConfig(
         "settings/log.conf",
         defaults={
-            "logfilename": "logs/flat-interface-en{0:d}-sigma{1:d}-l{2:d}-asus.log".format(
+            "logfilename": "logs/flat-interface-en{0:d}-sigma{1:d}-l{2:d}.log".format(
                 args.en, args.sigma, args.posi
             )
         },
