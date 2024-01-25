@@ -77,7 +77,7 @@ if __name__ == "__main__":
     for coarse_grid_ind, osly_ind in product(
         range(len(coarse_grid_list)), range(len(osly_list))
     ):
-        coeff, source, u = get_test_settings(fine_grid, sigma_pm)
+        coeff, source, u = get_test_settings(fine_grid, sigma_pm, l)
 
         coarse_grid = coarse_grid_list[coarse_grid_ind]
         osly = osly_list[osly_ind]

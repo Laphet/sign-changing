@@ -204,115 +204,107 @@ class CemGmsfem:
             glb_vec[node_ind] = vec[loc_fd_ind]
         return glb_vec
 
+    def get_ms_basis_on_coarse_elem(self, coarse_elem_ind: int):
+        max_data_len = (2 * self.oversamp_layer + 1) ** 2 * (
+            (self.sub_grid + 1) ** 4 + self.sub_elem * BB.N_V**2
+        )
+        fd_num = self.loc_fd_num[coarse_elem_ind]
+        ind_map_dic = self.ind_map_list[coarse_elem_ind]
+        II = -np.ones((max_data_len,), dtype=np.int32)
+        JJ = -np.ones((max_data_len,), dtype=np.int32)
+        VV = np.zeros((max_data_len,))
+        marker = 0
+        rhs_basis = np.zeros((fd_num, self.eigen_num))
+        lf_lim, rg_lim, dw_lim, up_lim = self.get_coarse_ngh_elem_lim(coarse_elem_ind)
+        for coarse_ngh_elem_ind_y, coarse_ngh_elem_ind_x in product(
+            range(dw_lim, up_lim), range(lf_lim, rg_lim)
+        ):
+            coarse_ngh_elem_ind = (
+                coarse_ngh_elem_ind_y * self.coarse_grid + coarse_ngh_elem_ind_x
+            )
+            S_mat = self.S_mat_list[coarse_ngh_elem_ind]
+            S_abs_mat = self.S_abs_mat_list[coarse_ngh_elem_ind]
+            eigen_vec = self.eigen_vec[
+                :,
+                coarse_ngh_elem_ind
+                * self.eigen_num : (coarse_ngh_elem_ind + 1)
+                * self.eigen_num,
+            ]
+            S_abs_E_mat = S_abs_mat.dot(eigen_vec)
+            Et_S_E_mat = eigen_vec.T @ (S_mat.dot(eigen_vec))
+            Q_mat = S_abs_E_mat @ Et_S_E_mat @ S_abs_E_mat.T
+            Z_mat = Et_S_E_mat @ S_abs_E_mat.T
+            node_sub_ind_list = -np.ones(((self.sub_grid + 1) ** 2,), dtype=np.int32)
+            fd_ind_list = -np.ones(((self.sub_grid + 1) ** 2,), dtype=np.int32)
+            marker_ = 0
+            for node_sub_ind_y, node_sub_ind_x in product(
+                range(self.sub_grid + 1), range(self.sub_grid + 1)
+            ):
+                node_sub_ind = node_sub_ind_y * (self.sub_grid + 1) + node_sub_ind_x
+                node_ind_y = coarse_ngh_elem_ind_y * self.sub_grid + node_sub_ind_y
+                node_ind_x = coarse_ngh_elem_ind_x * self.sub_grid + node_sub_ind_x
+                node_ind = node_ind_y * (self.fine_grid + 1) + node_ind_x
+                if node_ind in ind_map_dic:
+                    fd_ind = ind_map_dic[node_ind]
+                    node_sub_ind_list[marker_] = node_sub_ind
+                    fd_ind_list[marker_] = fd_ind
+                    marker_ += 1
+            for ind_i in range(marker_):
+                node_sub_ind_i = node_sub_ind_list[ind_i]
+                fd_ind_i = fd_ind_list[ind_i]
+                for ind_j in range(marker_):
+                    node_sub_ind_j = node_sub_ind_list[ind_j]
+                    fd_ind_j = fd_ind_list[ind_j]
+                    II[marker] = fd_ind_i
+                    JJ[marker] = fd_ind_j
+                    VV[marker] = Q_mat[node_sub_ind_i, node_sub_ind_j]
+                    marker += 1
+                if coarse_ngh_elem_ind == coarse_elem_ind:
+                    for eigen_ind in range(self.eigen_num):
+                        rhs_basis[fd_ind_i, eigen_ind] += Z_mat[
+                            eigen_ind, node_sub_ind_i
+                        ]
+            for sub_elem_ind_y, sub_elem_ind_x in product(
+                range(self.sub_grid), range(self.sub_grid)
+            ):
+                fine_elem_ind_y = coarse_ngh_elem_ind_y * self.sub_grid + sub_elem_ind_y
+                fine_elem_ind_x = coarse_ngh_elem_ind_x * self.sub_grid + sub_elem_ind_x
+                loc_coeff = self.coeff[fine_elem_ind_x, fine_elem_ind_y]
+
+                for loc_ind_i in range(BB.N_V):
+                    node_ind_i, _ = self.get_node_ind(
+                        fine_elem_ind_x, fine_elem_ind_y, loc_ind_i
+                    )
+                    if node_ind_i in ind_map_dic:
+                        fd_ind_i = ind_map_dic[node_ind_i]
+                        for loc_ind_j in range(BB.N_V):
+                            node_ind_j, _ = self.get_node_ind(
+                                fine_elem_ind_x, fine_elem_ind_y, loc_ind_j
+                            )
+                            if node_ind_j in ind_map_dic:
+                                fd_ind_j = ind_map_dic[node_ind_j]
+                                II[marker] = fd_ind_i
+                                JJ[marker] = fd_ind_j
+                                VV[marker] = loc_coeff * (
+                                    BB.elem_Laplace_stiff_mat[loc_ind_i, loc_ind_j]
+                                )
+                                marker += 1
+        Op_mat = csr_matrix(
+            (VV[:marker], (II[:marker], JJ[:marker])), shape=(fd_num, fd_num)
+        )
+        basis_wrt_coarse_elem = np.zeros(rhs_basis.shape)
+        for eigen_ind in range(self.eigen_num):
+            basis = spsolve(Op_mat, rhs_basis[:, eigen_ind])
+            basis_wrt_coarse_elem[:, eigen_ind] = basis
+        self.basis_list[coarse_elem_ind] = basis_wrt_coarse_elem
+
     def get_ms_basis(self):
         # assert self.oversamp_layer > 0 and self.eigen_num > 0
         # assert len(self.ind_map_list) > 0
 
-        max_data_len = (2 * self.oversamp_layer + 1) ** 2 * (
-            (self.sub_grid + 1) ** 4 + self.sub_elem * BB.N_V**2
-        )
         prc_flag = 1
         for coarse_elem_ind in range(self.coarse_elem):
-            fd_num = self.loc_fd_num[coarse_elem_ind]
-            ind_map_dic = self.ind_map_list[coarse_elem_ind]
-            II = -np.ones((max_data_len,), dtype=np.int32)
-            JJ = -np.ones((max_data_len,), dtype=np.int32)
-            VV = np.zeros((max_data_len,))
-            marker = 0
-            rhs_basis = np.zeros((fd_num, self.eigen_num))
-            lf_lim, rg_lim, dw_lim, up_lim = self.get_coarse_ngh_elem_lim(
-                coarse_elem_ind
-            )
-            for coarse_ngh_elem_ind_y, coarse_ngh_elem_ind_x in product(
-                range(dw_lim, up_lim), range(lf_lim, rg_lim)
-            ):
-                coarse_ngh_elem_ind = (
-                    coarse_ngh_elem_ind_y * self.coarse_grid + coarse_ngh_elem_ind_x
-                )
-                S_mat = self.S_mat_list[coarse_ngh_elem_ind]
-                S_abs_mat = self.S_abs_mat_list[coarse_ngh_elem_ind]
-                eigen_vec = self.eigen_vec[
-                    :,
-                    coarse_ngh_elem_ind
-                    * self.eigen_num : (coarse_ngh_elem_ind + 1)
-                    * self.eigen_num,
-                ]
-                S_abs_E_mat = S_abs_mat.dot(eigen_vec)
-                Et_S_E_mat = eigen_vec.T @ (S_mat.dot(eigen_vec))
-                Q_mat = S_abs_E_mat @ Et_S_E_mat @ S_abs_E_mat.T
-                Z_mat = Et_S_E_mat @ S_abs_E_mat.T
-                node_sub_ind_list = -np.ones(
-                    ((self.sub_grid + 1) ** 2,), dtype=np.int32
-                )
-                fd_ind_list = -np.ones(((self.sub_grid + 1) ** 2,), dtype=np.int32)
-                marker_ = 0
-                for node_sub_ind_y, node_sub_ind_x in product(
-                    range(self.sub_grid + 1), range(self.sub_grid + 1)
-                ):
-                    node_sub_ind = node_sub_ind_y * (self.sub_grid + 1) + node_sub_ind_x
-                    node_ind_y = coarse_ngh_elem_ind_y * self.sub_grid + node_sub_ind_y
-                    node_ind_x = coarse_ngh_elem_ind_x * self.sub_grid + node_sub_ind_x
-                    node_ind = node_ind_y * (self.fine_grid + 1) + node_ind_x
-                    if node_ind in ind_map_dic:
-                        fd_ind = ind_map_dic[node_ind]
-                        node_sub_ind_list[marker_] = node_sub_ind
-                        fd_ind_list[marker_] = fd_ind
-                        marker_ += 1
-                for ind_i in range(marker_):
-                    node_sub_ind_i = node_sub_ind_list[ind_i]
-                    fd_ind_i = fd_ind_list[ind_i]
-                    for ind_j in range(marker_):
-                        node_sub_ind_j = node_sub_ind_list[ind_j]
-                        fd_ind_j = fd_ind_list[ind_j]
-                        II[marker] = fd_ind_i
-                        JJ[marker] = fd_ind_j
-                        VV[marker] = Q_mat[node_sub_ind_i, node_sub_ind_j]
-                        marker += 1
-                    if coarse_ngh_elem_ind == coarse_elem_ind:
-                        for eigen_ind in range(self.eigen_num):
-                            rhs_basis[fd_ind_i, eigen_ind] += Z_mat[
-                                eigen_ind, node_sub_ind_i
-                            ]
-                for sub_elem_ind_y, sub_elem_ind_x in product(
-                    range(self.sub_grid), range(self.sub_grid)
-                ):
-                    fine_elem_ind_y = (
-                        coarse_ngh_elem_ind_y * self.sub_grid + sub_elem_ind_y
-                    )
-                    fine_elem_ind_x = (
-                        coarse_ngh_elem_ind_x * self.sub_grid + sub_elem_ind_x
-                    )
-                    loc_coeff = self.coeff[fine_elem_ind_x, fine_elem_ind_y]
-
-                    for loc_ind_i in range(BB.N_V):
-                        node_ind_i, _ = self.get_node_ind(
-                            fine_elem_ind_x, fine_elem_ind_y, loc_ind_i
-                        )
-                        if node_ind_i in ind_map_dic:
-                            fd_ind_i = ind_map_dic[node_ind_i]
-                            for loc_ind_j in range(BB.N_V):
-                                node_ind_j, _ = self.get_node_ind(
-                                    fine_elem_ind_x, fine_elem_ind_y, loc_ind_j
-                                )
-                                if node_ind_j in ind_map_dic:
-                                    fd_ind_j = ind_map_dic[node_ind_j]
-                                    II[marker] = fd_ind_i
-                                    JJ[marker] = fd_ind_j
-                                    VV[marker] = loc_coeff * (
-                                        BB.elem_Laplace_stiff_mat[loc_ind_i, loc_ind_j]
-                                    )
-                                    marker += 1
-            Op_mat = csr_matrix(
-                (VV[:marker], (II[:marker], JJ[:marker])), shape=(fd_num, fd_num)
-            )
-            # Op_mat = Op_mat.tocsr()
-            # assert info == 0
-            basis_wrt_coarse_elem = np.zeros(rhs_basis.shape)
-            for eigen_ind in range(self.eigen_num):
-                basis = spsolve(Op_mat, rhs_basis[:, eigen_ind])
-                # assert info == 0
-                basis_wrt_coarse_elem[:, eigen_ind] = basis
-            self.basis_list[coarse_elem_ind] = basis_wrt_coarse_elem
+            self.get_ms_basis_on_coarse_elem(coarse_elem_ind)
             if coarse_elem_ind > prc_flag / 10 * self.coarse_elem:
                 logging.info(
                     "......{0:.2f}%".format(coarse_elem_ind / self.coarse_elem * 100.0)
@@ -487,10 +479,10 @@ if __name__ == "__main__":
     logging.info("=" * 80)
     logging.info("Start")
 
-    sigma_pm = [1.0, -1.0]
+    sigma_pm = [2.0, 1.0]
     fine_grid = 32
     coarse_grid_list = [8]
-    osly_list = [0]
+    osly_list = [1, 2, 3, 4]
     eigen_num = 3
     rela_errors_h1 = np.zeros((len(coarse_grid_list), len(osly_list)))
     rela_errors_l2 = np.zeros(rela_errors_h1.shape)
