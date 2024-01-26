@@ -17,26 +17,38 @@ FIGS_ROOT_PATH = "resources"
 RATIO = 0.4
 
 
-def plot_elem_dat(dat: np.ndarray, ax, ran=[0.0, 1.0]):
+def plot_elem_dat(dat: np.ndarray, ax, ran=None):
     # In our setting, dat[i, j] means the block arround (x, y) = (i*h, j*h)
-    posi = ax.imshow(
-        dat.T,
-        aspect="equal",
-        interpolation="none",
-        origin="lower",
-        extent=(0.0, 1.0, 0.0, 1.0),
-        vmin=ran[0],
-        vmax=ran[1],
-    )
+    if ran == None:
+        posi = ax.imshow(
+            dat.T,
+            aspect="equal",
+            interpolation="none",
+            origin="lower",
+            extent=(0.0, 1.0, 0.0, 1.0),
+        )
+    else:
+        posi = ax.imshow(
+            dat.T,
+            aspect="equal",
+            interpolation="none",
+            origin="lower",
+            extent=(0.0, 1.0, 0.0, 1.0),
+            vmin=ran[0],
+            vmax=ran[1],
+        )
     ax.tick_params(axis="both", which="both", labelsize=SMALL_FONT_SIZE)
     return posi
 
 
-def plot_node_dat(dat: np.ndarray, ax, ran=[0.0, 1.0]):
+def plot_node_dat(dat: np.ndarray, ax, ran=None):
     # In our setting, dat[i, j] means the node at (x, y) = (j*h, i*h)
     xx = np.linspace(0.0, 1.0, dat.shape[1])
     yy = np.linspace(0.0, 1.0, dat.shape[0])
-    posi = ax.pcolormesh(xx, yy, dat, shading="gouraud", vmin=ran[0], vmax=ran[1])
+    if ran == None:
+        posi = ax.pcolormesh(xx, yy, dat, shading="gouraud")
+    else:
+        posi = ax.pcolormesh(xx, yy, dat, shading="gouraud", vmin=ran[0], vmax=ran[1])
     ax.set_aspect("equal", "box")
     ax.tick_params(axis="both", which="both", labelsize=SMALL_FONT_SIZE)
     return posi
@@ -46,7 +58,7 @@ def append_colorbar(fig, ax, posi):
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad="2%")
     cbar = fig.colorbar(posi, cax=cax)
-    cbar.ax.tick_params(labelsize=SMALL_FONT_SIZE)
+    cbar.ax.tick_params(labelsize=SMALL_FONT_SIZE, rotation=45)
 
 
 def plot_coeff(coeff: np.ndarray, file_name: str, l=None):
