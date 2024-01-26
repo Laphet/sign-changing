@@ -464,6 +464,12 @@ class CemGmsfem:
         u = u_ext[1:-1, 1:-1]
         return u.reshape((-1,))
 
+    def copy_eigen_space(self, fixed_solver):
+        self.eigen_vec = fixed_solver.eigen_vec
+        self.eigen_val = fixed_solver.eigen_val
+        self.S_abs_mat_list = fixed_solver.S_abs_mat_list
+        self.S_mat_list = fixed_solver.S_mat_list
+
 
 if __name__ == "__main__":
     from simple_flat_interface_settings import get_test_settings

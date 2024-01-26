@@ -3,12 +3,13 @@ import matplotlib.pyplot as plt
 from matplotlib import rc
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-rc("text", usetex=True)
 # Nature suggests that fontsizes should be between 5~7pt
-rc("font", **{"size": 6})
-SMALL_FONT_SIZE = 5.0
+DEFAULT_FONT_SIZE = 6
+rc("text", usetex=True)
+rc("font", **{"size": DEFAULT_FONT_SIZE})
 
-# rc("legend", fontsize=8)
+# rc("legend", fontsize=1)
+
 A4_WIDTH = 6.5
 plt.style.use("seaborn-v0_8-paper")
 
@@ -37,7 +38,7 @@ def plot_elem_dat(dat: np.ndarray, ax, ran=None):
             vmin=ran[0],
             vmax=ran[1],
         )
-    ax.tick_params(axis="both", which="both", labelsize=SMALL_FONT_SIZE)
+    ax.tick_params(axis="both", which="both", labelsize=DEFAULT_FONT_SIZE)
     return posi
 
 
@@ -50,15 +51,16 @@ def plot_node_dat(dat: np.ndarray, ax, ran=None):
     else:
         posi = ax.pcolormesh(xx, yy, dat, shading="gouraud", vmin=ran[0], vmax=ran[1])
     ax.set_aspect("equal", "box")
-    ax.tick_params(axis="both", which="both", labelsize=SMALL_FONT_SIZE)
+    ax.tick_params(axis="both", which="both", labelsize=DEFAULT_FONT_SIZE)
     return posi
 
 
 def append_colorbar(fig, ax, posi):
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="5%", pad="2%")
-    cbar = fig.colorbar(posi, cax=cax)
-    cbar.ax.tick_params(labelsize=SMALL_FONT_SIZE, rotation=45)
+    cax = divider.append_axes("top", size="5%", pad="2%")
+    cbar = fig.colorbar(posi, cax=cax, orientation="horizontal")
+    cbar.ax.tick_params(labelsize=DEFAULT_FONT_SIZE, rotation=15)
+    cax.xaxis.set_ticks_position("top")
 
 
 def plot_coeff(coeff: np.ndarray, file_name: str, l=None):
@@ -123,19 +125,30 @@ def plot_solution(u: np.ndarray, file_name: str):
 
 
 if __name__ == "__main__":
-    from square_inclusion_cells_settings import get_test_settings as periodic_settings
-    from simple_flat_interface_settings import get_test_settings as flat_settings
+    from simple_flat_interface_settings import get_test_settings
+    from itertools import product
 
-    fine_grid = 256
+    fine_grid = 400
+    sigma_pm_list = [[1.1, 1.0], [1.0, 1.1], [1.01, 1.0], [1.0, 1.01]]
+    l_list = [0.5, 0.5 - 1.0 / 128]
 
-    coeff = periodic_settings(fine_grid, [-1.0, 1.0], 8)
-    plot_coeff(coeff, "periodic-cells-coeff-32")
+    fig = plt.figure(layout="constrained")
+    axs = fig.subplots(len(l_list), len(sigma_pm_list))
 
-    coeff = periodic_settings(fine_grid, [-1.0, 1.0], 16)
-    plot_coeff(coeff, "periodic-cells-coeff-16")
+    for l_ind, sigma_ind in product(range(len(l_list)), range(len(sigma_pm_list))):
+        ax = axs[l_ind, sigma_ind]
+        l, sigma = l_list[l_ind], sigma_pm_list[sigma_ind]
+        (
+            coeff,
+            _,
+            _,
+        ) = get_test_settings(fine_grid, sigma, l)
+        posi = plot_elem_dat(coeff, ax)
+        append_colorbar(fig, ax, posi)
+        ax.set_xticks([], [])
+        ax.set_yticks([], [])
 
-    l = 0.25
-    coeff, _, u = flat_settings(fine_grid, [1.0, 1.0], l)
-    plot_coeff(coeff, "flat-interface", l)
-
-    plot_solution(u, "flat-interface-solution")
+    plt.savefig(
+        "{0:s}/{1:s}.pdf".format(FIGS_ROOT_PATH, "flat-interface-settings"),
+        bbox_inches="tight",
+    )
