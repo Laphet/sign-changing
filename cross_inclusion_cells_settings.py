@@ -25,8 +25,6 @@ def get_test_settings(fine_grids: int, sigma_im, cell_len=10):
 
 
 if __name__ == "__main__":
-    import plot_settings
-    import matplotlib.patches as patches
     from cem_gmsfem import CemGmsfem
 
     fine_grid = 400
@@ -67,11 +65,11 @@ if __name__ == "__main__":
                 solver.get_glb_A()
                 rela = np.zeros((2, eigen_num))
                 for k in range(eigen_num):
-                    u = eigen_vec_dat[i, k, :]
+                    u = ms_basis_dat[i, k, :]
                     rela[0, k] = np.sqrt(np.dot(solver.glb_A.dot(u), u))
                     rela[1, k] = np.linalg.norm(u)
                 for k1, k2 in product(range(len(osly_list) - 1), range(eigen_num)):
-                    delta_u = eigen_vec_dat[k1, k2, :] - eigen_vec_dat[i, k2, :]
+                    delta_u = ms_basis_dat[k1, k2, :] - ms_basis_dat[i, k2, :]
                     delta_u_h1 = np.sqrt(np.dot(solver.glb_A.dot(delta_u), delta_u))
                     delta_u_l2 = np.linalg.norm(delta_u)
                     errors_dat[0, k2, k1] = delta_u_h1 / rela[0, k2]
@@ -91,6 +89,9 @@ if __name__ == "__main__":
 
     plot_fig = False
     if plot_fig:
+        import plot_settings
+        import matplotlib.patches as patches
+
         # Begin to plot
         fig = plot_settings.plt.figure(
             figsize=(plot_settings.A4_WIDTH, plot_settings.A4_WIDTH),
