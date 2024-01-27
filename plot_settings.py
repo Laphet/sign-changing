@@ -1,17 +1,24 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from matplotlib import rc
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-# Nature suggests that fontsizes should be between 5~7pt
-DEFAULT_FONT_SIZE = 6
-rc("text", usetex=True)
-rc("font", **{"size": DEFAULT_FONT_SIZE})
+plt.style.use("seaborn-v0_8-paper")
 
-# rc("legend", fontsize=1)
+# Nature suggests that fontsizes should be between 5~7pt.
+DEFAULT_FONT_SIZE = 7
+SMALL_FONT_SIZE = 6
+# plt.rc("text", usetex=True)
+plt.rc("font", size=DEFAULT_FONT_SIZE)  # controls default text sizes
+plt.rc("axes", titlesize=DEFAULT_FONT_SIZE)  # fontsize of the axes title
+plt.rc("axes", labelsize=DEFAULT_FONT_SIZE)  # fontsize of the x and y labels
+plt.rc("xtick", labelsize=SMALL_FONT_SIZE)  # fontsize of the tick labels
+plt.rc("ytick", labelsize=SMALL_FONT_SIZE)  # fontsize of the tick labels
+plt.rc("legend", fontsize=SMALL_FONT_SIZE)  # legend fontsize
+plt.rc("figure", titlesize=DEFAULT_FONT_SIZE)  # fontsize of the figure title
 
 A4_WIDTH = 6.5
-plt.style.use("seaborn-v0_8-paper")
+# Nature suggests the width should be 180mm.
+NATURE_WIDTH = 7.0866142
 
 FIGS_ROOT_PATH = "resources"
 
@@ -38,7 +45,6 @@ def plot_elem_dat(dat: np.ndarray, ax, ran=None):
             vmin=ran[0],
             vmax=ran[1],
         )
-    ax.tick_params(axis="both", which="both", labelsize=DEFAULT_FONT_SIZE)
     return posi
 
 
@@ -51,7 +57,6 @@ def plot_node_dat(dat: np.ndarray, ax, ran=None):
     else:
         posi = ax.pcolormesh(xx, yy, dat, shading="gouraud", vmin=ran[0], vmax=ran[1])
     ax.set_aspect("equal", "box")
-    ax.tick_params(axis="both", which="both", labelsize=DEFAULT_FONT_SIZE)
     return posi
 
 
@@ -59,7 +64,7 @@ def append_colorbar(fig, ax, posi):
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("top", size="5%", pad="2%")
     cbar = fig.colorbar(posi, cax=cax, orientation="horizontal")
-    cbar.ax.tick_params(labelsize=DEFAULT_FONT_SIZE, rotation=15)
+    cbar.ax.tick_params(labelsize=SMALL_FONT_SIZE, rotation=15)
     cax.xaxis.set_ticks_position("top")
 
 

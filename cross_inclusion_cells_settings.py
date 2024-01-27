@@ -27,14 +27,18 @@ def get_test_settings(fine_grids: int, sigma_im, cell_len=10):
 if __name__ == "__main__":
     from cem_gmsfem import CemGmsfem
 
-    fine_grid = 100
+    fine_grid = 400
     coarse_grid = 10
     sub_grid = fine_grid // coarse_grid
-    sigma_im = [-0.05, 1.0]
+    sigma_im = [-0.001, 1.0]
     coeff = get_test_settings(fine_grid, sigma_im, sub_grid)
     eigen_num = 3
     coarse_elem_ind_x, coarse_elem_ind_y = 1, 2
     coarse_elem_ind = coarse_elem_ind_y * coarse_grid + coarse_elem_ind_x
+
+    print("=" * 80)
+    print("Start")
+    print("fine_grid={0:d}, sigma_im=({1:4e},{2:4e})".format(fine_grid, *sigma_im))
 
     fixed_solver = CemGmsfem(coarse_grid, eigen_num, 0, coeff)
     fixed_solver.get_eigen_pair()
@@ -67,7 +71,9 @@ if __name__ == "__main__":
         np.save("{0:s}/{1:s}".format(DAT_ROOT_PATH, "ms-basis.npy"), ms_basis_dat)
         print("Save all data!")
     else:
-        ms_basis_dat = np.load("{0:s}/{1:s}".format(DAT_ROOT_PATH, "ms-basis.npy"))
+        ms_basis_dat = np.load(
+            "{0:s}/{1:s}".format(DAT_ROOT_PATH, "ms-basis-0d001+1d0.npy")
+        )
         print("Load all data!")
 
     errors_dat = np.zeros((2, eigen_num, len(osly_list) - 1))
@@ -82,8 +88,8 @@ if __name__ == "__main__":
         delta_u = ms_basis_dat[k1, k2, :] - ms_basis_dat[-1, k2, :]
         delta_u_h1 = np.sqrt(np.dot(tmp_solver.glb_A.dot(delta_u), delta_u))
         delta_u_l2 = np.linalg.norm(delta_u)
-        errors_dat[0, k2, k1] = delta_u_h1 / rela[0, k2]
-        errors_dat[1, k2, k1] = delta_u_l2 / rela[1, k2]
+        errors_dat[0, k2, k1] = delta_u_h1
+        errors_dat[1, k2, k1] = delta_u_l2
 
     plot_fig = True
     if plot_fig:
@@ -125,7 +131,9 @@ if __name__ == "__main__":
         for i in range(eigen_num):
             dat = eigen_vec_dat[i, :].reshape((fixed_solver.sub_grid + 1, -1))
             ax = axs1[i + 1]
-            posi = plot_settings.plot_node_dat(dat, ax, [-0.5, 0.5])
+            posi = plot_settings.plot_node_dat(
+                dat, ax, [np.min(eigen_vec_dat), np.max(eigen_vec_dat)]
+            )
             plot_settings.append_colorbar(fig1, ax, posi)
             ax.set_xlabel("$x_1$")
             ax.set_ylabel("$x_2$")
@@ -147,40 +155,28 @@ if __name__ == "__main__":
                 ],
             )
 
+        ran = [None, None, None]
+        for i in range(eigen_num):
+            ran[i] = [np.min(ms_basis_dat[:3, i, :]), np.max(ms_basis_dat[:3, i, :])]
+
         for i in range(eigen_num):
             for osly_ind in [0, 1, 2]:
                 ax = axs2[i, osly_ind]
                 dat = ms_basis_dat[osly_ind, i, :].reshape((fine_grid + 1, -1))
-                print(
-                    "os_ly={0:d}, eigen_ind={1:d}, min={2:.6f}, max={3:.6f}".format(
-                        osly_list[osly_ind], i, np.min(dat), np.max(dat)
-                    )
-                )
-                posi = plot_settings.plot_node_dat(dat, ax)
+                posi = plot_settings.plot_node_dat(dat, ax, ran[i])
                 plot_settings.append_colorbar(fig2, ax, posi)
                 ax.set_xlabel("$x_1$")
                 ax.set_ylabel("$x_2$")
                 ax.set_xticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
                 ax.set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
-                # if osly_ind == 0:
-                #     ax.set_xlabel("$x_1$")
-                #     ax.set_ylabel("$x_2$")
-                #     ax.set_xticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
-                #     ax.set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
-                # else:
-                #     ax.set_xticks([], [])
-                #     ax.set_yticks([], [])
 
         for i in range(eigen_num):
             ax = axs2[i, 3]
             ax.plot(osly_list[:-1], errors_dat[0, i, :], label="in energy norm")
             ax.plot(osly_list[:-1], errors_dat[1, i, :], label="in $L^2$ norm")
             ax.set_yscale("log")
-            ax.tick_params(
-                axis="both", which="both", labelsize=plot_settings.DEFAULT_FONT_SIZE
-            )
             ax.set_xlabel("$m$")
-            ax.legend(loc=1, fontsize=plot_settings.DEFAULT_FONT_SIZE)
+            ax.legend(loc=1)
             # ax.yaxis.tick_right()
 
         fig1.savefig(

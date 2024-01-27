@@ -44,9 +44,9 @@ if __name__ == "__main__":
     # coarse_grid_list = [8, 16, 32, 64]
     fine_grid = 400
     coarse_grid_list = [10, 20, 40, 80]
-    osly_list = [3, 4]
-    sigma_pm_list = [[1.1, 1.0], [1.0, 1.1], [1.01, 1.0], [1.0, 1.01]]
-    l_list = [0.5, 0.5 - 1.0 / 128]
+    osly_list = [0, 1, 2, 3, 4]
+    sigma_pm_list = [[1.1, 1.0], [1.0, 1.1], [1.01, 1.0], [1.0, 1.01], [10.0, 1.0]]
+    l_list = [0.5, 0.5 - 1.0 / 100]
 
     parse = argparse.ArgumentParser()
     parse.add_argument("--en", default=3, type=int)
