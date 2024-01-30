@@ -27,10 +27,12 @@ def get_test_settings(fine_grids: int, sigma_im, cell_len=8):
 if __name__ == "__main__":
     from cem_gmsfem import CemGmsfem
 
-    fine_grid = 200
+    fine_grid = 400
     coarse_grid = 10
     sub_grid = fine_grid // coarse_grid
-    sigma_im = [-0.1, 1.0]
+    # sigma_im = [-0.1, 1.0]
+    sigma_im = [-1.0, 10.0]
+    token = "-0d1+1d0"
     coeff = get_test_settings(fine_grid, sigma_im, sub_grid)
     eigen_num = 3
     coarse_elem_ind_x, coarse_elem_ind_y = 1, 2
@@ -55,7 +57,7 @@ if __name__ == "__main__":
 
     ms_basis_dat = np.zeros((len(osly_list), eigen_num, (fine_grid + 1) ** 2))
 
-    prepare_dat = True
+    prepare_dat = False
     if prepare_dat:
         coeff = get_test_settings(fine_grid, sigma_im, sub_grid)
         for i, osly in enumerate(osly_list):
@@ -68,11 +70,15 @@ if __name__ == "__main__":
                     coarse_elem_ind, (solver.basis_list[coarse_elem_ind])[:, j]
                 )
             print("Finish osly={:d}".format(osly))
-        np.save("{0:s}/{1:s}".format(DAT_ROOT_PATH, "ms-basis.npy"), ms_basis_dat)
+        np.save(
+            "{0:s}/{1:s}".format(DAT_ROOT_PATH, "ms-basis{0:s}.npy".format(token)),
+            ms_basis_dat,
+        )
         print("Save all data!")
     else:
         ms_basis_dat = np.load(
-            "{0:s}/{1:s}".format(DAT_ROOT_PATH, "ms-basis-0d001+1d0.npy")
+            # "{0:s}/{1:s}".format(DAT_ROOT_PATH, "ms-basis-0d1+1d0.npy")
+            "{0:s}/{1:s}".format(DAT_ROOT_PATH, "ms-basis{0:s}.npy".format(token))
         )
         print("Load all data!")
 
@@ -88,8 +94,8 @@ if __name__ == "__main__":
         delta_u = ms_basis_dat[k1, k2, :] - ms_basis_dat[-1, k2, :]
         delta_u_h1 = np.sqrt(np.dot(tmp_solver.glb_A.dot(delta_u), delta_u))
         delta_u_l2 = np.linalg.norm(delta_u)
-        errors_dat[0, k2, k1] = delta_u_h1
-        errors_dat[1, k2, k1] = delta_u_l2
+        errors_dat[0, k2, k1] = delta_u_h1 / rela[0, k2]
+        errors_dat[1, k2, k1] = delta_u_l2 / rela[1, k2]
 
     plot_fig = True
     if plot_fig:
@@ -178,20 +184,19 @@ if __name__ == "__main__":
             ax.set_xlabel("$m$")
             ax.legend(loc=1)
             # ax.yaxis.tick_right()
-
         fig1.savefig(
-            "{0:s}/{1:s}.png".format(
+            "{0:s}/{1:s}.pdf".format(
                 plot_settings.FIGS_ROOT_PATH,
-                "square-inclusion-eigen",
+                "square-inclusion-eigen{0:s}".format(token),
             ),
             bbox_inches="tight",
-            dpi=450,
+            # dpi=450,
         )
         fig2.savefig(
             "{0:s}/{1:s}.png".format(
                 plot_settings.FIGS_ROOT_PATH,
-                "square-inclusion-ms",
+                "square-inclusion-ms{0:s}".format(token),
             ),
             bbox_inches="tight",
-            dpi=450,
+            dpi=500,
         )

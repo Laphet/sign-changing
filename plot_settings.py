@@ -66,6 +66,7 @@ def append_colorbar(fig, ax, posi):
     cbar = fig.colorbar(posi, cax=cax, orientation="horizontal")
     cbar.ax.tick_params(labelsize=SMALL_FONT_SIZE, rotation=15)
     cax.xaxis.set_ticks_position("top")
+    return cbar
 
 
 def plot_coeff(coeff: np.ndarray, file_name: str, l=None):

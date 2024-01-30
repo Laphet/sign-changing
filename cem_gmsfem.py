@@ -470,6 +470,11 @@ class CemGmsfem:
         self.S_abs_mat_list = fixed_solver.S_abs_mat_list
         self.S_mat_list = fixed_solver.S_mat_list
 
+    def get_plot_format(self, u):
+        u_ext = np.zeros((self.fine_grid + 1, self.fine_grid + 1))
+        u_ext[1:-1, 1:-1] = u.reshape((self.fine_grid - 1, -1))
+        return u_ext
+
 
 if __name__ == "__main__":
     from simple_flat_interface_settings import get_test_settings
@@ -485,18 +490,19 @@ if __name__ == "__main__":
     logging.info("=" * 80)
     logging.info("Start")
 
-    sigma_pm = [2.0, 1.0]
-    fine_grid = 32
-    coarse_grid_list = [8]
-    osly_list = [1, 2, 3, 4]
+    sigma_pm = [1.0, 1.01]
+    fine_grid = 400
+    coarse_grid_list = [80]
+    osly_list = [0]
     eigen_num = 3
+    l = 0.5 - 1.0 / 100
     rela_errors_h1 = np.zeros((len(coarse_grid_list), len(osly_list)))
     rela_errors_l2 = np.zeros(rela_errors_h1.shape)
 
     for coarse_grid_ind, osly_ind in product(
         range(len(coarse_grid_list)), range(len(osly_list))
     ):
-        coeff, source, u = get_test_settings(fine_grid, sigma_pm)
+        coeff, source, u = get_test_settings(fine_grid, sigma_pm, l)
 
         coarse_grid = coarse_grid_list[coarse_grid_ind]
         osly = osly_list[osly_ind]
@@ -521,11 +527,32 @@ if __name__ == "__main__":
         rela_error_l2 = delta_u_l2 / u_l2
         rela_errors_l2[coarse_grid_ind, osly_ind] = rela_error_l2
 
+        DAT_ROOT_PATH = "resources"
+        np.save(
+            "{0:s}/{1:s}".format(
+                DAT_ROOT_PATH, "delta-u-osly{0:d}-1d01+1d0.npy".format(osly)
+            ),
+            cem_gmsfem.get_plot_format(delta_u),
+        )
+
         logging.info(
             "relative energy error={0:4e}, plain-L2 error={1:4e}.".format(
                 rela_error_h1, rela_error_l2
             )
         )
+
+        import plot_settings
+
+        fig = plot_settings.plt.figure()
+        ax = fig.subplots(1, 1)
+        posi = plot_settings.plot_node_dat(cem_gmsfem.get_plot_format(delta_u), ax)
+        plot_settings.append_colorbar(fig, ax, posi)
+
+        ax.set_xlabel("$x_1$")
+        ax.set_ylabel("$x_2$")
+        ax.set_xticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
+        ax.set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
+        plot_settings.plt.show()
 
     print(rela_errors_h1)
     print(rela_errors_l2)

@@ -1,0 +1,71 @@
+Sender: LSF System <lsfadmin@c2u05n03>
+Subject: Job 502326: <cem-gmsfem> in cluster <cluster1> Done
+
+Job <cem-gmsfem> was submitted from host <ln02> by user <cjz> in cluster <cluster1> at Fri Jan 26 22:34:57 2024
+Job was executed on host(s) <36*c2u05n03>, in queue <batch>, as user <cjz> in cluster <cluster1> at Fri Jan 26 22:34:58 2024
+</share/home/cjz> was used as the home directory.
+</share/home/cjz/cqye/sign-changing-main> was used as the working directory.
+Started at Fri Jan 26 22:34:58 2024
+Terminated at Sat Jan 27 12:18:20 2024
+Results reported at Sat Jan 27 12:18:20 2024
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#BSUB -J cem-gmsfem
+#BSUB -n 36
+#BSUB -o logs/%J.lsf.out
+#BSUB -e logs/%J.lsf.err
+#BSUB -W 10080
+#BSUB -q batch
+#BSUB -R "span[ptile=36]"
+
+cd ${LS_SUBCWD}
+# set OMP_NUM_THREADS _and_ export! 
+OMP_NUM_THREADS=$LSB_DJOB_NUMPROC 
+export OMP_NUM_THREADS
+
+python simple_flat_interface_settings.py --en 3 --sigma 3 --posi 1
+# python cross_inclusion_cells_settings.py
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   667029.75 sec.
+    Max Memory :                                 22550 MB
+    Average Memory :                             4562.91 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   31 MB
+    Max Processes :                              4
+    Max Threads :                                40
+    Run time :                                   49401 sec.
+    Turnaround time :                            49403 sec.
+
+The output (if any) follows:
+
+[[9.69344311e-01 3.24820438e-01 4.93050960e-02 2.51541028e-02
+  1.51468460e-03]
+ [9.06781422e-01 4.89904426e-01 3.87363228e-02 4.80304366e-03
+  5.45083430e-04]
+ [8.26528390e-01 2.06337297e+01 1.87278599e-01 3.77396182e-03
+  3.28189592e-04]
+ [5.32491202e-01 8.18371802e-01 6.34861041e-02 1.22224091e-02
+  3.24127787e-03]]
+[[1.30436808e+00 2.99145603e-01 3.09348583e-03 6.73567396e-04
+  9.60597683e-05]
+ [1.24371860e+00 8.55535424e-02 3.95137540e-03 2.14130497e-04
+  2.13810006e-05]
+ [1.13901739e+00 4.27398082e+00 1.77414416e-01 1.04846237e-04
+  1.13070597e-05]
+ [7.32301960e-01 6.82626850e-01 2.81452928e-02 6.20809650e-03
+  3.92624240e-04]]
+
+
+PS:
+
+Read file <logs/502326.lsf.err> for stderr output of this job.
+
