@@ -198,5 +198,5 @@ if __name__ == "__main__":
                 "square-inclusion-ms{0:s}".format(token),
             ),
             bbox_inches="tight",
-            dpi=500,
+            dpi=plot_settings.DPI,
         )

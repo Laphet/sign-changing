@@ -386,10 +386,10 @@ if __name__ == "__main__":
             ax.plot(xaxis_ticks, dat1[i][4:, 4], "*-", label="$m=4$")
             ax.set_ylabel("in $L^2$ norm")
 
-        axs1[0].set_title("$(\sigma_*^+, \sigma_*^-, l)=(1.01, 1.0, 0.50)$")
-        axs1[1].set_title("$(\sigma_*^+, \sigma_*^-, l)=(1.01, 1.0, 0.50)$")
-        axs1[2].set_title("$(\sigma_*^+, \sigma_*^-, l)=(1.0, 1.01, 0.50)$")
-        axs1[3].set_title("$(\sigma_*^+, \sigma_*^-, l)=(1.0, 1.01, 0.50)$")
+        axs1[0].set_title("$(\sigma_*^+, \sigma_*^-, l)$=(1.01, 1.0, 0.50)")
+        # axs1[1].set_title("$(\sigma_*^+, \sigma_*^-, l)=(1.01, 1.0, 0.50)$")
+        axs1[2].set_title("$(\sigma_*^+, \sigma_*^-, l)$=(1.0, 1.01, 0.50)")
+        # axs1[3].set_title("$(\sigma_*^+, \sigma_*^-, l)=(1.0, 1.01, 0.50)$")
 
         # Insert the common legends.
         handles, labels = axs1[0].get_legend_handles_labels()
@@ -410,10 +410,10 @@ if __name__ == "__main__":
         ax.plot(xaxis_ticks, dat2[1][:4, 3], "*-", label="$m=3$")
         ax.plot(xaxis_ticks, dat2[1][:4, 4], "*-", label="$m=4$")
         ax.set_ylabel("in energy norm")
-        ax.set_title("$(\sigma_*^+, \sigma_*^-, l)=(1.01, 1.0, 0.49)$")
         ax.set_yscale("log")
         ax.set_xlabel("$H$")
         ax.set_xticks(xaxis_ticks, xaxis_labels)
+        ax.set_title("$(\sigma_*^+, \sigma_*^-, l)$=(1.01, 1.0, 0.49)")
 
         ax = axs2[1]
         ax.plot(xaxis_ticks, dat2[1][4:, 0], "*-", label="$Q_1$")
@@ -421,7 +421,7 @@ if __name__ == "__main__":
         ax.plot(xaxis_ticks, dat2[1][4:, 2], "*-", label="$m=2$")
         ax.plot(xaxis_ticks, dat2[1][4:, 3], "*-", label="$m=3$")
         ax.plot(xaxis_ticks, dat2[1][4:, 4], "*-", label="$m=4$")
-        ax.set_title("$(\sigma_*^+, \sigma_*^-, l)=(1.01, 1.0, 0.49)$")
+        #
         ax.set_ylabel("in $L^2$ norm")
         ax.set_yscale("log")
         ax.set_xlabel("$H$")
@@ -432,8 +432,8 @@ if __name__ == "__main__":
             handles=handles,
             labels=labels,
             loc="lower center",
-            bbox_to_anchor=(0.25, -0.15),
-            ncol=3,
+            bbox_to_anchor=(0.3, -0.10),
+            ncol=5,
             fancybox=True,
             shadow=True,
             alignment="center",
@@ -447,7 +447,7 @@ if __name__ == "__main__":
         ax.set_ylabel("$x_2$")
         ax.set_xticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
         ax.set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
-        ax.set_title("Error by $Q_1$ and $H=1/80$", y=-0.5)
+        # ax.set_title("Error by $Q_1$ and $H=1/80$", y=-0.5)
 
         ax = axs2[3]
         posi = plot_settings.plot_node_dat(delta_u_osly3, ax)
@@ -457,7 +457,8 @@ if __name__ == "__main__":
         ax.set_ylabel("$x_2$")
         ax.set_xticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
         ax.set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
-        ax.set_title("Error by $m=3$ and $H=1/80$", y=-0.5)
+        # ax.set_title("Error by $m=3$ and $H=1/80$", y=-0.5)
+        # fig2.suptitle("$(\sigma_*^+, \sigma_*^-, l)$=(1.01, 1.0, 0.49)")
 
         fig1.savefig(
             "{0:s}/{1:s}.pdf".format(
@@ -472,5 +473,5 @@ if __name__ == "__main__":
                 "flat-interface-error-{0:s}".format("l1"),
             ),
             bbox_inches="tight",
-            dpi=500,
+            dpi=plot_settings.DPI,
         )

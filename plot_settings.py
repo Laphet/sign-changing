@@ -24,6 +24,9 @@ FIGS_ROOT_PATH = "resources"
 
 RATIO = 0.4
 
+# Some pdfs are too big! Maybe it is better to use pngs.
+DPI = 1000
+
 
 def plot_elem_dat(dat: np.ndarray, ax, ran=None):
     # In our setting, dat[i, j] means the block arround (x, y) = (i*h, j*h)
