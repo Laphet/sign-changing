@@ -483,9 +483,7 @@ if __name__ == "__main__":
     import os
     from logging import config
 
-    config.fileConfig(
-        os.path.join("settings", "log.conf"), defaults={"logfilename": "logs/test.log"}
-    )
+    config.fileConfig("log.conf", defaults={"logfilename": "logs/test.log"})
 
     logging.info("=" * 80)
     logging.info("Start")

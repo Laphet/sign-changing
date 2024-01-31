@@ -53,7 +53,7 @@ if __name__ == "__main__":
     parse.add_argument("--sigma", default=0, type=int)
     args = parse.parse_args()
     config.fileConfig(
-        "settings/log.conf",
+        "log.conf",
         defaults={
             "logfilename": "logs/random-inclusion-osly{0:d}-sigma{1:d}.log".format(
                 args.osly, args.sigma

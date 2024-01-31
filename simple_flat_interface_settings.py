@@ -67,7 +67,7 @@ if __name__ == "__main__":
     parse.add_argument("--posi", default=0, type=int)
     args = parse.parse_args()
     config.fileConfig(
-        "settings/log.conf",
+        "log.conf",
         defaults={
             "logfilename": "logs/flat-interface-en{0:d}-sigma{1:d}-l{2:d}.log".format(
                 args.en, args.sigma, args.posi
