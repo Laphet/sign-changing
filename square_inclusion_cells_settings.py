@@ -2,11 +2,12 @@ import numpy as np
 from itertools import product
 
 DAT_ROOT_PATH = "resources"
+VARIANCE = 0.01
 
 
 def get_test_settings(fine_grids: int, sigma_im, cell_len=8):
     coeff = np.zeros((fine_grids, fine_grids))
-
+    source = np.zeros(coeff.shape)
     for elem_ind_x, elem_ind_y in product(range(fine_grids), range(fine_grids)):
         sub_elem_ind_x = elem_ind_x % cell_len
         sub_elem_ind_y = elem_ind_y % cell_len
@@ -21,17 +22,36 @@ def get_test_settings(fine_grids: int, sigma_im, cell_len=8):
             coeff[elem_ind_x, elem_ind_y] = sigma_im[0]
         else:
             coeff[elem_ind_x, elem_ind_y] = sigma_im[1]
-    return coeff
+
+        x = (elem_ind_x + 0.5) / source.shape[0]
+        y = (elem_ind_y + 0.5) / source.shape[1]
+        r = np.sqrt((x - 0.25) ** 2 + (y - 0.25) ** 2)
+        source[elem_ind_x, elem_ind_y] += (
+            np.exp(-(r**2) / 2.0 / VARIANCE) / VARIANCE / (2.0 * np.pi)
+        )
+        r = np.sqrt((x - 0.25) ** 2 + (y - 0.75) ** 2)
+        source[elem_ind_x, elem_ind_y] += (
+            np.exp(-(r**2) / 2.0 / VARIANCE) / VARIANCE / (2.0 * np.pi)
+        )
+        r = np.sqrt((x - 0.75) ** 2 + (y - 0.25) ** 2)
+        source[elem_ind_x, elem_ind_y] += (
+            np.exp(-(r**2) / 2.0 / VARIANCE) / VARIANCE / (2.0 * np.pi)
+        )
+        r = np.sqrt((x - 0.75) ** 2 + (y - 0.75) ** 2)
+        source[elem_ind_x, elem_ind_y] += (
+            np.exp(-(r**2) / 2.0 / VARIANCE) / VARIANCE / (2.0 * np.pi)
+        )
+    return coeff, source
 
 
-if __name__ == "__main__":
+if __name__ == "__main_ms_basis__":
     from cem_gmsfem import CemGmsfem
 
     fine_grid = 400
     coarse_grid = 10
     sub_grid = fine_grid // coarse_grid
-    # sigma_im = [-0.1, 1.0]
-    sigma_im = [-1.0, 10.0]
+    sigma_im = [-0.1, 1.0]
+    # sigma_im = [-1.0, 10.0]
     token = "-0d1+1d0"
     coeff = get_test_settings(fine_grid, sigma_im, sub_grid)
     eigen_num = 3
@@ -200,3 +220,96 @@ if __name__ == "__main__":
             bbox_inches="tight",
             dpi=plot_settings.DPI,
         )
+
+
+if __name__ == "__main__":
+    from cem_gmsfem import CemGmsfem
+    from fem import get_fem_mat, get_mass_mat, get_fem_rhs
+    import argparse
+    import logging
+    from logging import config
+    from scipy.sparse.linalg import spsolve
+
+    fine_grid = 100
+    coarse_grid_list = [10, 20, 40, 80]
+    osly_list = [0, 1, 2, 3, 4]
+    cell_len_list = [20, 40, 10]
+
+    eigen_num = 3
+    sigma_im = [-0.1, 1.0]
+
+    parse = argparse.ArgumentParser()
+    parse.add_argument("--cell", default=0, type=int)
+    args = parse.parse_args()
+    cell_len = cell_len_list[args.cell]
+
+    coeff, source = get_test_settings(fine_grid, sigma_im, cell_len)
+
+    prepare_dat = True
+    if prepare_dat:
+        fem_mat_abs = get_fem_mat(np.abs(coeff))
+        mass_mat = get_mass_mat(np.ones(coeff.shape))
+        mat_fem = get_fem_mat(coeff)
+        rhs = get_fem_rhs(source)
+        u_fem = spsolve(mat_fem, rhs)
+        u_h1 = np.sqrt(np.dot(fem_mat_abs.dot(u_fem), u_fem))
+        u_l2 = np.sqrt(np.dot(mass_mat.dot(u_fem), u_fem))
+
+        u_ext = np.zeros((fine_grid + 1, fine_grid + 1))
+        u_ext[1:-1, 1:-1] = u_fem.reshape((fine_grid - 1, -1))
+        np.save(
+            "{0:s}/{1:s}".format(
+                DAT_ROOT_PATH, "square-inclusion-cell{:d}.npy".format(cell_len)
+            ),
+            u_ext,
+        )
+
+        config.fileConfig(
+            "log.conf",
+            defaults={
+                "logfilename": "logs/square-inclusion-subgrid{:d}.log".format(cell_len)
+            },
+        )
+
+        logging.info("=" * 80)
+        logging.info("Start")
+        logging.info(
+            "In the medium, sigma+={0:.4e}, sigma-={1:.4e}, cell_len={2:d}".format(
+                *sigma_im, cell_len
+            )
+        )
+
+        rela_errors_h1 = np.zeros((len(coarse_grid_list), len(osly_list)))
+        rela_errors_l2 = np.zeros(rela_errors_h1.shape)
+
+        for coarse_grid_ind, osly_ind in product(
+            range(len(coarse_grid_list)), range(len(osly_list))
+        ):
+            coarse_grid = coarse_grid_list[coarse_grid_ind]
+            osly = osly_list[osly_ind]
+
+            solver = CemGmsfem(coarse_grid, eigen_num, osly, coeff)
+            solver.setup()
+            u_cem = None
+            if osly == 0:
+                u_cem = solver.solve_by_coarse_bilinear(source)
+            else:
+                u_cem = solver.solve(source)
+
+            delta_u = u_fem - u_cem
+
+            delta_u_h1 = np.sqrt(np.dot(fem_mat_abs.dot(delta_u), delta_u))
+            rela_error_h1 = delta_u_h1 / u_h1
+            rela_errors_h1[coarse_grid_ind, osly_ind] = rela_error_h1
+
+            delta_u_l2 = np.sqrt(np.dot(mass_mat.dot(delta_u), delta_u))
+            rela_error_l2 = delta_u_l2 / u_l2
+            rela_errors_l2[coarse_grid_ind, osly_ind] = rela_error_l2
+
+            logging.info(
+                "relative energy error={0:6e}, plain-L2 error={1:6e}.".format(
+                    rela_error_h1, rela_error_l2
+                )
+            )
+        print(rela_errors_h1)
+        print(rela_errors_l2)
