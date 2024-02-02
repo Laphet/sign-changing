@@ -445,8 +445,10 @@ if __name__ == "__main__":
         cbar.formatter.set_powerlimits((0, 0))
         ax.set_xlabel("$x_1$")
         ax.set_ylabel("$x_2$")
-        ax.set_xticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
-        ax.set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
+        ax.set_xticks([0.0, 1.0], ["0.0", "1.0"])
+        ax.xaxis.set_label_coords(0.5, -0.1)
+        ax.set_yticks([0.0, 1.0], ["0.0", "1.0"])
+        ax.yaxis.set_label_coords(-0.1, 0.5)
         # ax.set_title("Error by $Q_1$ and $H=1/80$", y=-0.5)
 
         ax = axs2[3]
@@ -455,8 +457,10 @@ if __name__ == "__main__":
         cbar.formatter.set_powerlimits((0, 0))
         ax.set_xlabel("$x_1$")
         ax.set_ylabel("$x_2$")
-        ax.set_xticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
-        ax.set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
+        ax.set_xticks([0.0, 1.0], ["0.0", "1.0"])
+        ax.xaxis.set_label_coords(0.5, -0.1)
+        ax.set_yticks([0.0, 1.0], ["0.0", "1.0"])
+        ax.yaxis.set_label_coords(-0.1, 0.5)
         # ax.set_title("Error by $m=3$ and $H=1/80$", y=-0.5)
         # fig2.suptitle("$(\sigma_*^+, \sigma_*^-, l)$=(1.01, 1.0, 0.49)")
 

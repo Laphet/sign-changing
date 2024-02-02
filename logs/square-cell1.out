@@ -1,0 +1,74 @@
+Sender: LSF System <lsfadmin@c6u26n04>
+Subject: Job 503260: <cem-gmsfem> in cluster <cluster1> Done
+
+Job <cem-gmsfem> was submitted from host <ln02> by user <cjz> in cluster <cluster1> at Thu Feb  1 13:33:57 2024
+Job was executed on host(s) <36*c6u26n04>, in queue <batch>, as user <cjz> in cluster <cluster1> at Thu Feb  1 13:33:57 2024
+</share/home/cjz> was used as the home directory.
+</share/home/cjz/cqye/sign-changing-main> was used as the working directory.
+Started at Thu Feb  1 13:33:57 2024
+Terminated at Fri Feb  2 03:12:04 2024
+Results reported at Fri Feb  2 03:12:04 2024
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#BSUB -J cem-gmsfem
+#BSUB -n 36
+#BSUB -o logs/%J.lsf.out
+#BSUB -e logs/%J.lsf.err
+#BSUB -W 10080
+#BSUB -q batch
+#BSUB -R "span[ptile=36]"
+
+cd ${LS_SUBCWD}
+# set OMP_NUM_THREADS _and_ export! 
+OMP_NUM_THREADS=$LSB_DJOB_NUMPROC 
+export OMP_NUM_THREADS
+
+# python simple_flat_interface_settings.py --en 3 --sigma 4 --posi 1
+# python cross_inclusion_cells_settings.py
+# python square_inclusion_cells_settings.py
+# python random_inclusion_settings.py --osly 4 --sigma 1
+python square_inclusion_cells_settings.py --cell 1
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   670020.69 sec.
+    Max Memory :                                 22580 MB
+    Average Memory :                             4584.46 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   568 MB
+    Max Processes :                              4
+    Max Threads :                                40
+    Run time :                                   49087 sec.
+    Turnaround time :                            49087 sec.
+
+The output (if any) follows:
+
+[[6.08118593e-01 2.43294994e-01 5.16230471e-02 5.22453303e-02
+  5.23150551e-02]
+ [6.02143921e-01 3.78548060e-01 4.96049422e-02 5.58312503e-02
+  5.66200143e-02]
+ [2.77296490e-01 6.97828262e-01 4.01113407e-02 1.75301146e-03
+  1.37559146e-04]
+ [1.73068366e-01 8.83205301e-01 8.89513534e-02 3.85498737e-03
+  1.94060015e-04]]
+[[3.25267870e-01 8.93104743e-02 5.74053343e-03 5.78539821e-03
+  5.78605100e-03]
+ [3.18135323e-01 1.92327279e-01 4.98052381e-03 5.92211567e-03
+  6.02412334e-03]
+ [7.44368266e-02 5.83254996e-01 2.29192819e-03 3.29267333e-05
+  3.07513565e-06]
+ [2.99430683e-02 8.61005613e-01 1.06422320e-02 3.99088642e-05
+  1.92089883e-06]]
+
+
+PS:
+
+Read file <logs/503260.lsf.err> for stderr output of this job.
+
