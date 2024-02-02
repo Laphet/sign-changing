@@ -244,8 +244,10 @@ if __name__ == "__main__":
         plot_settings.append_colorbar(fig1, ax, posi)
         ax.set_xlabel("$x_1$")
         ax.set_ylabel("$x_2$")
-        ax.set_xticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
-        ax.set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
+        ax.set_xticks([0.0, 1.0], ["0.0", "1.0"])
+        ax.xaxis.set_label_coords(0.5, -0.1)
+        ax.set_yticks([0.0, 1.0], ["0.0", "1.0"])
+        ax.yaxis.set_label_coords(-0.1, 0.5)
         # ax.set_title("Medium configuration")
 
         ax = axs1[1]
@@ -253,8 +255,10 @@ if __name__ == "__main__":
         plot_settings.append_colorbar(fig1, ax, posi)
         ax.set_xlabel("$x_1$")
         ax.set_ylabel("$x_2$")
-        ax.set_xticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
-        ax.set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
+        ax.set_xticks([0.0, 1.0], ["0.0", "1.0"])
+        ax.xaxis.set_label_coords(0.5, -0.1)
+        ax.set_yticks([0.0, 1.0], ["0.0", "1.0"])
+        ax.yaxis.set_label_coords(-0.1, 0.5)
         # ax.set_title("($\sigma_*^+$, $\sigma_*^-$)=(1.0, 1.0e-3)")
 
         ax = axs1[2]
@@ -262,8 +266,10 @@ if __name__ == "__main__":
         plot_settings.append_colorbar(fig1, ax, posi)
         ax.set_xlabel("$x_1$")
         ax.set_ylabel("$x_2$")
-        ax.set_xticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
-        ax.set_yticks([0.0, 0.5, 1.0], ["0.0", "0.5", "1.0"])
+        ax.set_xticks([0.0, 1.0], ["0.0", "1.0"])
+        ax.xaxis.set_label_coords(0.5, -0.1)
+        ax.set_yticks([0.0, 1.0], ["0.0", "1.0"])
+        ax.yaxis.set_label_coords(-0.1, 0.5)
         # ax.set_title("($\sigma_*^+$, $\sigma_*^-$)=(1.0, 1.0e+3)")
 
         xaxis_ticks = [1, 2, 3, 4]
