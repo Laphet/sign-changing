@@ -135,6 +135,8 @@ if __name__ == "__main__":
         )
         axs2 = fig2.subplots(3, 4)
 
+        axs_title_list = ["(a)", "(b)", "(c)", "(d)"]
+
         ax = axs1[0]
         posi = plot_settings.plot_elem_dat(coeff, ax, sigma_im)
         ax.set_xlabel("$x_1$")
@@ -155,10 +157,12 @@ if __name__ == "__main__":
         )
         ax.add_patch(rect)
         plot_settings.append_colorbar(fig1, ax, posi)
+        ax.set_title(axs_title_list[0], x=-0.1, y=1.1, fontweight="bold")
 
         for i in range(eigen_num):
             dat = eigen_vec_dat[i, :].reshape((fixed_solver.sub_grid + 1, -1))
             ax = axs1[i + 1]
+            ax.set_title(axs_title_list[i + 1], x=-0.1, y=1.05, fontweight="bold")
             posi = plot_settings.plot_node_dat(
                 dat, ax, [np.min(eigen_vec_dat), np.max(eigen_vec_dat)]
             )
@@ -188,6 +192,7 @@ if __name__ == "__main__":
         for i in range(eigen_num):
             ran[i] = [np.min(ms_basis_dat[:3, i, :]), np.max(ms_basis_dat[:3, i, :])]
 
+        alphabeta = ["a", "b", "c"]
         for i in range(eigen_num):
             for osly_ind in [0, 1, 2]:
                 ax = axs2[i, osly_ind]
@@ -199,7 +204,13 @@ if __name__ == "__main__":
                 ax.set_xticks([0.0, 1.0], ["0.0", "1.0"])
                 ax.xaxis.set_label_coords(0.5, -0.1)
                 ax.set_yticks([0.0, 1.0], ["0.0", "1.0"])
-                ax.yaxis.set_label_coords(-0.1, 0.5)
+                ax.yaxis.set_label_coords(-0.15, 0.5)
+                ax.set_title(
+                    "({0:s}-{1:d})".format(alphabeta[i], osly_ind + 1),
+                    x=-0.15,
+                    y=1.05,
+                    fontweight="bold",
+                )
 
         for i in range(eigen_num):
             ax = axs2[i, 3]
@@ -207,7 +218,15 @@ if __name__ == "__main__":
             ax.plot(osly_list[:-1], errors_dat[1, i, :], label="in $L^2$ norm")
             ax.set_yscale("log")
             ax.set_xlabel("$m$")
+            ax.xaxis.set_label_coords(1.0, -0.08)
             ax.legend(loc=1)
+            ax.set_title(
+                "({0:s}-{1:d})".format(alphabeta[i], 4),
+                loc="left",
+                x=-0.15,
+                y=1.0,
+                fontweight="bold",
+            )
             # ax.yaxis.tick_right()
         fig1.savefig(
             "{0:s}/{1:s}.pdf".format(
