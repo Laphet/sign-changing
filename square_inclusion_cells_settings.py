@@ -44,7 +44,7 @@ def get_test_settings(fine_grids: int, sigma_im, cell_len=8):
     return coeff, source
 
 
-if __name__ == "__main__":
+if __name__ == "__main_b__":
     from cem_gmsfem import CemGmsfem
 
     fine_grid = 400
@@ -335,7 +335,7 @@ if __name__ == "__main_prepare_dat__":
     print(rela_errors_l2)
 
 
-if __name__ == "__main_a__":
+if __name__ == "__main__":
     import plot_settings
 
     u_cell20 = np.load(
@@ -383,6 +383,11 @@ if __name__ == "__main_a__":
     ax.xaxis.set_label_coords(0.5, -0.1)
     ax.set_yticks([0.0, 1.0], ["0.0", "1.0"])
     ax.yaxis.set_label_coords(-0.1, 0.5)
+
+    ax_labels = ["(a)", "(b)", "(c)"]
+    for i in range(3):
+        ax = axs[i]
+        ax.set_title(ax_labels[i], x=-0.2, y=1.2, fontweight="bold")
 
     fig.savefig(
         "{0:s}/{1:s}.png".format(
@@ -513,3 +518,40 @@ if __name__ == "__main_a__":
             ],
         ]
     )
+
+    H_labels = [
+        r"$\frac{1}{10}$",
+        r"$\frac{1}{20}$",
+        r"$\frac{1}{40}$",
+        r"$\frac{1}{80}$",
+    ]
+    for i in range(4):
+        print(
+            H_labels[i],
+            *[
+                r"\num{"
+                + "{:.3e}".format(error_cell40[i, j + 1])
+                + "}"
+                + r" & \num{"
+                + "{:.3e}".format(error_cell40[i + 4, j + 1])
+                + "}"
+                for j in range(4)
+            ],
+            sep=" & ",
+            end=" \\\\\n"
+        )
+    for i in range(4):
+        print(
+            H_labels[i],
+            *[
+                r"\num{"
+                + "{:.3e}".format(error_cell20[i, j + 1])
+                + "}"
+                + r" & \num{"
+                + "{:.3e}".format(error_cell20[i + 4, j + 1])
+                + "}"
+                for j in range(4)
+            ],
+            sep=" & ",
+            end=" \\\\\n"
+        )

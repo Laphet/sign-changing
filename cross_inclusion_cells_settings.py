@@ -341,6 +341,11 @@ if __name__ == "__main__":
     posi = plot_settings.plot_node_dat(u_cell20_sigma0, ax)
     plot_settings.append_colorbar(fig_sigma0_a, ax, posi)
 
+    ax_labels = ["(a)", "(b)", "(c)", "(d)"]
+    for i in range(4):
+        ax = axs_sigma0_a[i]
+        ax.set_title(ax_labels[i], x=-0.2, y=1.2, fontweight="bold")
+
     for ax in axs_sigma0_b:
         ax.set_yscale("log")
         ax.set_xlabel("$H$")
@@ -348,37 +353,37 @@ if __name__ == "__main__":
 
     ax = axs_sigma0_b[0]
     ax.plot(xaxis_ticks, error_cell40_sigma0[:4, 0], "*-", label="$Q_1$")
-    ax.plot(xaxis_ticks, error_cell40_sigma0[:4, 1], "*-", label="$m=1$")
-    ax.plot(xaxis_ticks, error_cell40_sigma0[:4, 2], "*-", label="$m=2$")
-    ax.plot(xaxis_ticks, error_cell40_sigma0[:4, 3], "*-", label="$m=3$")
-    ax.plot(xaxis_ticks, error_cell40_sigma0[:4, 4], "*-", label="$m=4$")
-    ax.set_ylabel("in energy norm")
-    ax.set_title("$(\sigma_*^+, \sigma_*^-, M)$=(1.0, 1.0e-3, 10)")
+    ax.plot(xaxis_ticks, error_cell40_sigma0[:4, 1], "D-", label="$m=1$")
+    ax.plot(xaxis_ticks, error_cell40_sigma0[:4, 2], "d-", label="$m=2$")
+    ax.plot(xaxis_ticks, error_cell40_sigma0[:4, 3], "H-", label="$m=3$")
+    ax.plot(xaxis_ticks, error_cell40_sigma0[:4, 4], "h-", label="$m=4$")
+    ax.set_ylabel("Relative errors in energy norm")
+    ax.set_title("$(\sigma_*^+, \sigma_*^-, M)=(1.0, 1.0e-3, 10)$")
 
     ax = axs_sigma0_b[1]
     ax.plot(xaxis_ticks, error_cell40_sigma0[4:, 0], "*-", label="$Q_1$")
-    ax.plot(xaxis_ticks, error_cell40_sigma0[4:, 1], "*-", label="$m=1$")
-    ax.plot(xaxis_ticks, error_cell40_sigma0[4:, 2], "*-", label="$m=2$")
-    ax.plot(xaxis_ticks, error_cell40_sigma0[4:, 3], "*-", label="$m=3$")
-    ax.plot(xaxis_ticks, error_cell40_sigma0[4:, 4], "*-", label="$m=4$")
-    ax.set_ylabel("in $L^2$ norm")
+    ax.plot(xaxis_ticks, error_cell40_sigma0[4:, 1], "D-", label="$m=1$")
+    ax.plot(xaxis_ticks, error_cell40_sigma0[4:, 2], "d-", label="$m=2$")
+    ax.plot(xaxis_ticks, error_cell40_sigma0[4:, 3], "H-", label="$m=3$")
+    ax.plot(xaxis_ticks, error_cell40_sigma0[4:, 4], "h-", label="$m=4$")
+    ax.set_ylabel("Relative errors in $L^2$ norm")
 
     ax = axs_sigma0_b[2]
     ax.plot(xaxis_ticks, error_cell20_sigma0[:4, 0], "*-", label="$Q_1$")
-    ax.plot(xaxis_ticks, error_cell20_sigma0[:4, 1], "*-", label="$m=1$")
-    ax.plot(xaxis_ticks, error_cell20_sigma0[:4, 2], "*-", label="$m=2$")
-    ax.plot(xaxis_ticks, error_cell20_sigma0[:4, 3], "*-", label="$m=3$")
-    ax.plot(xaxis_ticks, error_cell20_sigma0[:4, 4], "*-", label="$m=4$")
-    ax.set_ylabel("in energy norm")
-    ax.set_title("$(\sigma_*^+, \sigma_*^-, M)$=(1.0, 1.0e-3, 20)")
+    ax.plot(xaxis_ticks, error_cell20_sigma0[:4, 1], "D-", label="$m=1$")
+    ax.plot(xaxis_ticks, error_cell20_sigma0[:4, 2], "d-", label="$m=2$")
+    ax.plot(xaxis_ticks, error_cell20_sigma0[:4, 3], "H-", label="$m=3$")
+    ax.plot(xaxis_ticks, error_cell20_sigma0[:4, 4], "h-", label="$m=4$")
+    ax.set_ylabel("Relative errors in energy norm")
+    ax.set_title("$(\sigma_*^+, \sigma_*^-, M)=(1.0, 1.0e-3, 20)$")
 
     ax = axs_sigma0_b[3]
     ax.plot(xaxis_ticks, error_cell20_sigma0[4:, 0], "*-", label="$Q_1$")
-    ax.plot(xaxis_ticks, error_cell20_sigma0[4:, 1], "*-", label="$m=1$")
-    ax.plot(xaxis_ticks, error_cell20_sigma0[4:, 2], "*-", label="$m=2$")
-    ax.plot(xaxis_ticks, error_cell20_sigma0[4:, 3], "*-", label="$m=3$")
-    ax.plot(xaxis_ticks, error_cell20_sigma0[4:, 4], "*-", label="$m=4$")
-    ax.set_ylabel("in $L^2$ norm")
+    ax.plot(xaxis_ticks, error_cell20_sigma0[4:, 1], "D-", label="$m=1$")
+    ax.plot(xaxis_ticks, error_cell20_sigma0[4:, 2], "d-", label="$m=2$")
+    ax.plot(xaxis_ticks, error_cell20_sigma0[4:, 3], "H-", label="$m=3$")
+    ax.plot(xaxis_ticks, error_cell20_sigma0[4:, 4], "h-", label="$m=4$")
+    ax.set_ylabel("Relative errors in $L^2$ norm")
 
     handles, labels = axs_sigma0_b[0].get_legend_handles_labels()
     fig_sigma0_b.legend(
@@ -415,6 +420,10 @@ if __name__ == "__main__":
     posi = plot_settings.plot_node_dat(u_cell20_sigma1, ax)
     plot_settings.append_colorbar(fig_sigma1_a, ax, posi)
 
+    for i in range(4):
+        ax = axs_sigma1_a[i]
+        ax.set_title(ax_labels[i], x=-0.2, y=1.2, fontweight="bold")
+
     for ax in axs_sigma1_b:
         ax.set_yscale("log")
         ax.set_xlabel("$H$")
@@ -422,37 +431,37 @@ if __name__ == "__main__":
 
     ax = axs_sigma1_b[0]
     ax.plot(xaxis_ticks, error_cell40_sigma1[:4, 0], "*-", label="$Q_1$")
-    ax.plot(xaxis_ticks, error_cell40_sigma1[:4, 1], "*-", label="$m=1$")
-    ax.plot(xaxis_ticks, error_cell40_sigma1[:4, 2], "*-", label="$m=2$")
-    ax.plot(xaxis_ticks, error_cell40_sigma1[:4, 3], "*-", label="$m=3$")
-    ax.plot(xaxis_ticks, error_cell40_sigma1[:4, 4], "*-", label="$m=4$")
-    ax.set_ylabel("in energy norm")
-    ax.set_title("$(\sigma_*^+, \sigma_*^-, M)$=(1.0, 1.0e+3, 10)")
+    ax.plot(xaxis_ticks, error_cell40_sigma1[:4, 1], "D-", label="$m=1$")
+    ax.plot(xaxis_ticks, error_cell40_sigma1[:4, 2], "d-", label="$m=2$")
+    ax.plot(xaxis_ticks, error_cell40_sigma1[:4, 3], "H-", label="$m=3$")
+    ax.plot(xaxis_ticks, error_cell40_sigma1[:4, 4], "h-", label="$m=4$")
+    ax.set_ylabel("Relative errors in energy norm")
+    ax.set_title("$(\sigma_*^+, \sigma_*^-, M)=(1.0, 1.0e+3, 10)$")
 
     ax = axs_sigma1_b[1]
     ax.plot(xaxis_ticks, error_cell40_sigma1[4:, 0], "*-", label="$Q_1$")
-    ax.plot(xaxis_ticks, error_cell40_sigma1[4:, 1], "*-", label="$m=1$")
-    ax.plot(xaxis_ticks, error_cell40_sigma1[4:, 2], "*-", label="$m=2$")
-    ax.plot(xaxis_ticks, error_cell40_sigma1[4:, 3], "*-", label="$m=3$")
-    ax.plot(xaxis_ticks, error_cell40_sigma1[4:, 4], "*-", label="$m=4$")
-    ax.set_ylabel("in $L^2$ norm")
+    ax.plot(xaxis_ticks, error_cell40_sigma1[4:, 1], "D-", label="$m=1$")
+    ax.plot(xaxis_ticks, error_cell40_sigma1[4:, 2], "d-", label="$m=2$")
+    ax.plot(xaxis_ticks, error_cell40_sigma1[4:, 3], "H-", label="$m=3$")
+    ax.plot(xaxis_ticks, error_cell40_sigma1[4:, 4], "h-", label="$m=4$")
+    ax.set_ylabel("Relative errors in $L^2$ norm")
 
     ax = axs_sigma1_b[2]
     ax.plot(xaxis_ticks, error_cell20_sigma1[:4, 0], "*-", label="$Q_1$")
-    ax.plot(xaxis_ticks, error_cell20_sigma1[:4, 1], "*-", label="$m=1$")
-    ax.plot(xaxis_ticks, error_cell20_sigma1[:4, 2], "*-", label="$m=2$")
-    ax.plot(xaxis_ticks, error_cell20_sigma1[:4, 3], "*-", label="$m=3$")
-    ax.plot(xaxis_ticks, error_cell20_sigma1[:4, 4], "*-", label="$m=4$")
-    ax.set_ylabel("in energy norm")
-    ax.set_title("$(\sigma_*^+, \sigma_*^-, M)$=(1.0, 1.0e+3, 20)")
+    ax.plot(xaxis_ticks, error_cell20_sigma1[:4, 1], "D-", label="$m=1$")
+    ax.plot(xaxis_ticks, error_cell20_sigma1[:4, 2], "d-", label="$m=2$")
+    ax.plot(xaxis_ticks, error_cell20_sigma1[:4, 3], "H-", label="$m=3$")
+    ax.plot(xaxis_ticks, error_cell20_sigma1[:4, 4], "h-", label="$m=4$")
+    ax.set_ylabel("Relative errors in energy norm")
+    ax.set_title("$(\sigma_*^+, \sigma_*^-, M)=(1.0, 1.0e+3, 20)$")
 
     ax = axs_sigma1_b[3]
     ax.plot(xaxis_ticks, error_cell20_sigma1[4:, 0], "*-", label="$Q_1$")
-    ax.plot(xaxis_ticks, error_cell20_sigma1[4:, 1], "*-", label="$m=1$")
-    ax.plot(xaxis_ticks, error_cell20_sigma1[4:, 2], "*-", label="$m=2$")
-    ax.plot(xaxis_ticks, error_cell20_sigma1[4:, 3], "*-", label="$m=3$")
-    ax.plot(xaxis_ticks, error_cell20_sigma1[4:, 4], "*-", label="$m=4$")
-    ax.set_ylabel("in $L^2$ norm")
+    ax.plot(xaxis_ticks, error_cell20_sigma1[4:, 1], "D-", label="$m=1$")
+    ax.plot(xaxis_ticks, error_cell20_sigma1[4:, 2], "d-", label="$m=2$")
+    ax.plot(xaxis_ticks, error_cell20_sigma1[4:, 3], "H-", label="$m=3$")
+    ax.plot(xaxis_ticks, error_cell20_sigma1[4:, 4], "h-", label="$m=4$")
+    ax.set_ylabel("Relative errors in $L^2$ norm")
 
     handles, labels = axs_sigma1_b[0].get_legend_handles_labels()
     fig_sigma1_b.legend(

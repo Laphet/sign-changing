@@ -363,32 +363,41 @@ if __name__ == "__main__":
 
         xaxis_ticks = [1, 2, 3, 4]
         xaxis_labels = ["$1/10$", "$1/20$", "$1/40$", "$1/80$"]
+        ax_titles = ["(a)", "(b)", "(c)", "(d)"]
 
+        positions = [1.0, 1.0, 1.0, 1.0]
         for i in range(4):
             ax = axs1[i]
             ax.set_yscale("log")
             ax.set_xlabel("$H$")
             ax.set_xticks(xaxis_ticks, xaxis_labels)
+            # ax.text(
+            #     -0.4,
+            #     positions[i],
+            #     ax_titles[i],
+            #     fontweight="bold",
+            #     fontsize=plot_settings.DEFAULT_FONT_SIZE,
+            # )
 
         for i in [0, 1]:
             ax = axs1[2 * i]
             ax.plot(xaxis_ticks, dat1[i][:4, 0], "*-", label="$Q_1$")
-            ax.plot(xaxis_ticks, dat1[i][:4, 1], "*-", label="$m=1$")
-            ax.plot(xaxis_ticks, dat1[i][:4, 2], "*-", label="$m=2$")
-            ax.plot(xaxis_ticks, dat1[i][:4, 3], "*-", label="$m=3$")
-            ax.plot(xaxis_ticks, dat1[i][:4, 4], "*-", label="$m=4$")
-            ax.set_ylabel("in energy norm")
+            ax.plot(xaxis_ticks, dat1[i][:4, 1], "D-", label="$m=1$")
+            ax.plot(xaxis_ticks, dat1[i][:4, 2], "d-", label="$m=2$")
+            ax.plot(xaxis_ticks, dat1[i][:4, 3], "H-", label="$m=3$")
+            ax.plot(xaxis_ticks, dat1[i][:4, 4], "h-", label="$m=4$")
+            ax.set_ylabel("Relative errors in energy norm")
             ax = axs1[2 * i + 1]
             ax.plot(xaxis_ticks, dat1[i][4:, 0], "*-", label="$Q_1$")
-            ax.plot(xaxis_ticks, dat1[i][4:, 1], "*-", label="$m=1$")
-            ax.plot(xaxis_ticks, dat1[i][4:, 2], "*-", label="$m=2$")
-            ax.plot(xaxis_ticks, dat1[i][4:, 3], "*-", label="$m=3$")
-            ax.plot(xaxis_ticks, dat1[i][4:, 4], "*-", label="$m=4$")
-            ax.set_ylabel("in $L^2$ norm")
+            ax.plot(xaxis_ticks, dat1[i][4:, 1], "D-", label="$m=1$")
+            ax.plot(xaxis_ticks, dat1[i][4:, 2], "d-", label="$m=2$")
+            ax.plot(xaxis_ticks, dat1[i][4:, 3], "H-", label="$m=3$")
+            ax.plot(xaxis_ticks, dat1[i][4:, 4], "h-", label="$m=4$")
+            ax.set_ylabel("Relative errors in $L^2$ norm")
 
-        axs1[0].set_title("$(\sigma_*^+, \sigma_*^-, l)$=(1.01, 1.0, 0.50)")
+        axs1[0].set_title("$(\sigma_*^+, \sigma_*^-, \gamma)=(1.01, 1.0, 0.50)$")
         # axs1[1].set_title("$(\sigma_*^+, \sigma_*^-, l)=(1.01, 1.0, 0.50)$")
-        axs1[2].set_title("$(\sigma_*^+, \sigma_*^-, l)$=(1.0, 1.01, 0.50)")
+        axs1[2].set_title("$(\sigma_*^+, \sigma_*^-, \gamma)=(1.0, 1.01, 0.50)$")
         # axs1[3].set_title("$(\sigma_*^+, \sigma_*^-, l)=(1.0, 1.01, 0.50)$")
 
         # Insert the common legends.
@@ -405,24 +414,24 @@ if __name__ == "__main__":
 
         ax = axs2[0]
         ax.plot(xaxis_ticks, dat2[1][:4, 0], "*-", label="$Q_1$")
-        ax.plot(xaxis_ticks, dat2[1][:4, 1], "*-", label="$m=1$")
-        ax.plot(xaxis_ticks, dat2[1][:4, 2], "*-", label="$m=2$")
-        ax.plot(xaxis_ticks, dat2[1][:4, 3], "*-", label="$m=3$")
-        ax.plot(xaxis_ticks, dat2[1][:4, 4], "*-", label="$m=4$")
-        ax.set_ylabel("in energy norm")
+        ax.plot(xaxis_ticks, dat2[1][:4, 1], "D-", label="$m=1$")
+        ax.plot(xaxis_ticks, dat2[1][:4, 2], "d-", label="$m=2$")
+        ax.plot(xaxis_ticks, dat2[1][:4, 3], "H-", label="$m=3$")
+        ax.plot(xaxis_ticks, dat2[1][:4, 4], "h-", label="$m=4$")
+        ax.set_ylabel("Relative errors in energy norm")
         ax.set_yscale("log")
         ax.set_xlabel("$H$")
         ax.set_xticks(xaxis_ticks, xaxis_labels)
-        ax.set_title("$(\sigma_*^+, \sigma_*^-, l)$=(1.01, 1.0, 0.49)")
+        ax.set_title("$(\sigma_*^+, \sigma_*^-, \gamma)=(1.0, 1.01, 0.49)$")
 
         ax = axs2[1]
         ax.plot(xaxis_ticks, dat2[1][4:, 0], "*-", label="$Q_1$")
-        ax.plot(xaxis_ticks, dat2[1][4:, 1], "*-", label="$m=1$")
-        ax.plot(xaxis_ticks, dat2[1][4:, 2], "*-", label="$m=2$")
-        ax.plot(xaxis_ticks, dat2[1][4:, 3], "*-", label="$m=3$")
-        ax.plot(xaxis_ticks, dat2[1][4:, 4], "*-", label="$m=4$")
+        ax.plot(xaxis_ticks, dat2[1][4:, 1], "D-", label="$m=1$")
+        ax.plot(xaxis_ticks, dat2[1][4:, 2], "d-", label="$m=2$")
+        ax.plot(xaxis_ticks, dat2[1][4:, 3], "H-", label="$m=3$")
+        ax.plot(xaxis_ticks, dat2[1][4:, 4], "h-", label="$m=4$")
         #
-        ax.set_ylabel("in $L^2$ norm")
+        ax.set_ylabel("Relative errors in $L^2$ norm")
         ax.set_yscale("log")
         ax.set_xlabel("$H$")
         ax.set_xticks(xaxis_ticks, xaxis_labels)
@@ -464,12 +473,24 @@ if __name__ == "__main__":
         # ax.set_title("Error by $m=3$ and $H=1/80$", y=-0.5)
         # fig2.suptitle("$(\sigma_*^+, \sigma_*^-, l)$=(1.01, 1.0, 0.49)")
 
+        # positions = [2.5, 1.8, 1.2, 1.2]
+        # for i in range(4):
+        #     ax = axs2[i]
+        #     ax.text(
+        #         -0.4,
+        #         positions[i],
+        #         ax_titles[i],
+        #         fontweight="bold",
+        #         fontsize=plot_settings.DEFAULT_FONT_SIZE,
+        #     )
+
         fig1.savefig(
-            "{0:s}/{1:s}.pdf".format(
+            "{0:s}/{1:s}.png".format(
                 plot_settings.FIGS_ROOT_PATH,
                 "flat-interface-error-{0:s}".format("l0"),
             ),
             bbox_inches="tight",
+            dpi=plot_settings.DPI,
         )
         fig2.savefig(
             "{0:s}/{1:s}.png".format(
