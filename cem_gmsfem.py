@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.sparse import csr_matrix
 
-# from scipy.sparse.linalg import spsolve
 # The default sparse solver in scipy is superLU, with optional interfaces to UMFPACK.
 # All those solvers are not parallelized.
 # from scipy.sparse.linalg import spsolve
@@ -310,9 +309,6 @@ class CemGmsfem:
         self.basis_list[coarse_elem_ind] = basis_wrt_coarse_elem
 
     def get_ms_basis(self):
-        # assert self.oversamp_layer > 0 and self.eigen_num > 0
-        # assert len(self.ind_map_list) > 0
-
         prc_flag = 1
         for coarse_elem_ind in range(self.coarse_elem):
             self.get_ms_basis_on_coarse_elem(coarse_elem_ind)
