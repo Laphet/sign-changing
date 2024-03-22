@@ -1,11 +1,22 @@
 import numpy as np
 from scipy.sparse import csr_matrix
-from scipy.sparse.linalg import spsolve
-from scipy.sparse.linalg import eigsh
-import bilinear_bases as BB
-from itertools import product
 
-import logging
+# from scipy.sparse.linalg import spsolve
+# The default sparse solver in scipy is superLU, with optional interfaces to UMFPACK.
+# All those solvers are not parallelized.
+# from scipy.sparse.linalg import spsolve
+# Try to use the parallelized solver in the mkl library (Pardiso).
+import pypardiso
+
+spsolve = pypardiso.spsolve
+from scipy.sparse.linalg import eigsh
+from itertools import product
+from datetime import datetime
+from fem import N_V, elem_bilinear_mass_mat, elem_Laplace_stiff_mat
+
+
+def print_log(str):
+    print("{0:s}\t{1:s}".format(datetime.now().strftime("%Y-%m-%d %H:%M:%S"), str))
 
 
 class CemGmsfem:
@@ -17,7 +28,7 @@ class CemGmsfem:
         coeff: np.ndarray,
     ) -> None:
         if coeff.shape[0] != coeff.shape[1]:
-            print("The shape {0:d} != {1:d}".format(coeff.shape[0], coeff.shape[1]))
+            print_log("The shape {0:d} != {1:d}".format(coeff.shape[0], coeff.shape[1]))
             return
         self.fine_grid = coeff.shape[0]
         self.coarse_grid = coarse_grid
@@ -33,7 +44,7 @@ class CemGmsfem:
         self.coeff_abs = np.abs(self.coeff)
         self.kappa = 24.0 * self.coarse_grid**2 * self.coeff
         self.kappa_abs = np.abs(self.kappa)
-        logging.info(
+        print_log(
             "CEM-GMsFEM uses fine_grid={0:d}, coarse_grid={1:d}, eigen_num={2:d}, oversamp_layer={3:d}".format(
                 self.fine_grid, self.coarse_grid, self.eigen_num, self.oversamp_layer
             )
@@ -81,7 +92,7 @@ class CemGmsfem:
         for coarse_elem_ind_y, coarse_elem_ind_x in product(
             range(self.coarse_grid), range(self.coarse_grid)
         ):
-            max_data_len = self.sub_elem * BB.N_V**2
+            max_data_len = self.sub_elem * N_V**2
             II = np.zeros((max_data_len,), dtype=np.int32)
             JJ = np.zeros((max_data_len,), dtype=np.int32)
             A_abs_val = np.zeros((max_data_len,))
@@ -96,7 +107,7 @@ class CemGmsfem:
                 loc_coeff_abs = self.coeff_abs[fine_elem_ind_x, fine_elem_ind_y]
                 loc_kappa_abs = self.kappa_abs[fine_elem_ind_x, fine_elem_ind_y]
                 loc_kappa = self.kappa[fine_elem_ind_x, fine_elem_ind_y]
-                for loc_ind_row, loc_ind_col in product(range(BB.N_V), range(BB.N_V)):
+                for loc_ind_row, loc_ind_col in product(range(N_V), range(N_V)):
                     iy, ix = divmod(loc_ind_row, 2)
                     jy, jx = divmod(loc_ind_col, 2)
                     II[marker] = (
@@ -110,17 +121,17 @@ class CemGmsfem:
                         + jx
                     )
                     A_abs_val[marker] = loc_coeff_abs * (
-                        BB.elem_Laplace_stiff_mat[loc_ind_row, loc_ind_col]
+                        elem_Laplace_stiff_mat[loc_ind_row, loc_ind_col]
                     )
                     S_abs_val[marker] = (
                         self.h**2
                         * loc_kappa_abs
-                        * BB.elem_bilinear_mass_mat[loc_ind_row, loc_ind_col]
+                        * elem_bilinear_mass_mat[loc_ind_row, loc_ind_col]
                     )
                     S_val[marker] = (
                         self.h**2
                         * loc_kappa
-                        * BB.elem_bilinear_mass_mat[loc_ind_row, loc_ind_col]
+                        * elem_bilinear_mass_mat[loc_ind_row, loc_ind_col]
                     )
                     marker += 1
 
@@ -206,7 +217,7 @@ class CemGmsfem:
 
     def get_ms_basis_on_coarse_elem(self, coarse_elem_ind: int):
         max_data_len = (2 * self.oversamp_layer + 1) ** 2 * (
-            (self.sub_grid + 1) ** 4 + self.sub_elem * BB.N_V**2
+            (self.sub_grid + 1) ** 4 + self.sub_elem * N_V**2
         )
         fd_num = self.loc_fd_num[coarse_elem_ind]
         ind_map_dic = self.ind_map_list[coarse_elem_ind]
@@ -271,13 +282,13 @@ class CemGmsfem:
                 fine_elem_ind_x = coarse_ngh_elem_ind_x * self.sub_grid + sub_elem_ind_x
                 loc_coeff = self.coeff[fine_elem_ind_x, fine_elem_ind_y]
 
-                for loc_ind_i in range(BB.N_V):
+                for loc_ind_i in range(N_V):
                     node_ind_i, _ = self.get_node_ind(
                         fine_elem_ind_x, fine_elem_ind_y, loc_ind_i
                     )
                     if node_ind_i in ind_map_dic:
                         fd_ind_i = ind_map_dic[node_ind_i]
-                        for loc_ind_j in range(BB.N_V):
+                        for loc_ind_j in range(N_V):
                             node_ind_j, _ = self.get_node_ind(
                                 fine_elem_ind_x, fine_elem_ind_y, loc_ind_j
                             )
@@ -286,7 +297,7 @@ class CemGmsfem:
                                 II[marker] = fd_ind_i
                                 JJ[marker] = fd_ind_j
                                 VV[marker] = loc_coeff * (
-                                    BB.elem_Laplace_stiff_mat[loc_ind_i, loc_ind_j]
+                                    elem_Laplace_stiff_mat[loc_ind_i, loc_ind_j]
                                 )
                                 marker += 1
         Op_mat = csr_matrix(
@@ -306,13 +317,13 @@ class CemGmsfem:
         for coarse_elem_ind in range(self.coarse_elem):
             self.get_ms_basis_on_coarse_elem(coarse_elem_ind)
             if coarse_elem_ind > prc_flag / 10 * self.coarse_elem:
-                logging.info(
+                print_log(
                     "......{0:.2f}%".format(coarse_elem_ind / self.coarse_elem * 100.0)
                 )
                 prc_flag += 1
 
     def get_glb_A(self):
-        max_data_len = self.fine_grid**2 * BB.N_V**2
+        max_data_len = self.fine_grid**2 * N_V**2
         II = -np.ones((max_data_len,), dtype=np.int32)
         JJ = -np.ones((max_data_len,), dtype=np.int32)
         VV = np.zeros((max_data_len,))
@@ -321,8 +332,8 @@ class CemGmsfem:
             range(self.fine_grid), range(self.fine_grid)
         ):
             coeff = self.coeff[fine_elem_ind_x, fine_elem_ind_y]
-            elem_stiff_mat = coeff * BB.elem_Laplace_stiff_mat
-            for loc_ind_i, loc_ind_j in product(range(BB.N_V), range(BB.N_V)):
+            elem_stiff_mat = coeff * elem_Laplace_stiff_mat
+            for loc_ind_i, loc_ind_j in product(range(N_V), range(N_V)):
                 node_ind_i, _ = self.get_node_ind(
                     fine_elem_ind_x, fine_elem_ind_y, loc_ind_i
                 )
@@ -363,10 +374,10 @@ class CemGmsfem:
 
     def setup(self):
         self.get_glb_A()
-        logging.info("Finish getting the global stiffness matrix.")
+        print_log("Finish getting the global stiffness matrix.")
         if self.oversamp_layer >= 1:
             self.get_eigen_pair()
-            logging.info("Finish getting all eigenvalue-vector pairs.")
+            print_log("Finish getting all eigenvalue-vector pairs.")
             eigen_val_minmax = self.eigen_val.reshape(
                 (self.coarse_elem, self.eigen_num)
             )
@@ -378,31 +389,29 @@ class CemGmsfem:
                 np.min(np.max(eigen_val_minmax, axis=1)),
                 np.max(np.max(eigen_val_minmax, axis=1)),
             )
-            logging.info(
+            print_log(
                 "lambda_min=({0:.4e}, {1:.4e}), lambda_max=({2:.4e}, {3:.4e})".format(
                     *eigen_min_range, *eigen_max_range
                 )
             )
 
             self.get_ind_map()
-            logging.info(
+            print_log(
                 "Finish getting maps of [global node index] to [local freedom index]."
             )
             self.get_ms_basis()
-            logging.info("Finish getting the multiscale bases.")
+            print_log("Finish getting the multiscale bases.")
 
             self.get_glb_basis_spmat()
-            logging.info(
-                "Finish collecting all the bases in a sparse matrix formation."
-            )
+            print_log("Finish collecting all the bases in a sparse matrix formation.")
 
             self.A_ms = self.glb_basis_spmat_T * self.glb_A * self.glb_basis_spmat
-            logging.info("Finish constructing the final MS mat.")
+            print_log("Finish constructing the final MS mat.")
 
     def get_glb_rhs(self, source):
         glb_rhs = np.zeros((self.tot_node,))
         for fine_elem_ind_x, fine_elem_ind_y, loc_ind in product(
-            range(self.fine_grid), range(self.fine_grid), range(BB.N_V)
+            range(self.fine_grid), range(self.fine_grid), range(N_V)
         ):
             node_ind, is_bdry_node = self.get_node_ind(
                 fine_elem_ind_x, fine_elem_ind_y, loc_ind
@@ -480,13 +489,8 @@ if __name__ == "__main__":
     from simple_flat_interface_settings import get_test_settings
     from fem import get_fem_mat, get_mass_mat
 
-    import os
-    from logging import config
-
-    config.fileConfig("log.conf", defaults={"logfilename": "logs/test.log"})
-
-    logging.info("=" * 80)
-    logging.info("Start")
+    print_log("=" * 80)
+    print_log("Start")
 
     sigma_pm = [1.0, 1.01]
     fine_grid = 400
@@ -533,7 +537,7 @@ if __name__ == "__main__":
             cem_gmsfem.get_plot_format(delta_u),
         )
 
-        logging.info(
+        print_log(
             "relative energy error={0:4e}, plain-L2 error={1:4e}.".format(
                 rela_error_h1, rela_error_l2
             )

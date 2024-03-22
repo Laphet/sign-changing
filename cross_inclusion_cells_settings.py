@@ -45,12 +45,9 @@ def get_test_settings(fine_grids: int, sigma_im, cell_len=10):
 
 
 if __name__ == "__main_prepare_dat__":
-    from cem_gmsfem import CemGmsfem
+    from cem_gmsfem import CemGmsfem, print_log, spsolve
     from fem import get_fem_mat, get_mass_mat, get_fem_rhs
     import argparse
-    import logging
-    from logging import config
-    from scipy.sparse.linalg import spsolve
 
     fine_grid = 100
     coarse_grid_list = [10, 20, 40, 80]
@@ -86,18 +83,9 @@ if __name__ == "__main_prepare_dat__":
         u_ext,
     )
 
-    config.fileConfig(
-        "log.conf",
-        defaults={
-            "logfilename": "logs/cross-inclusion-cell{0:d}-sigma{1:d}.log".format(
-                cell_len, args.sigma
-            )
-        },
-    )
-
-    logging.info("=" * 80)
-    logging.info("Start")
-    logging.info(
+    print_log("=" * 80)
+    print_log("Start")
+    print_log(
         "In the medium, sigma_inc={0:.4e}, sigma_mat={1:.4e}, cell_len={2:d}".format(
             *sigma_im, cell_len
         )
@@ -130,7 +118,7 @@ if __name__ == "__main_prepare_dat__":
         rela_error_l2 = delta_u_l2 / u_l2
         rela_errors_l2[coarse_grid_ind, osly_ind] = rela_error_l2
 
-        logging.info(
+        print_log(
             "relative energy error={0:6e}, plain-L2 error={1:6e}.".format(
                 rela_error_h1, rela_error_l2
             )
