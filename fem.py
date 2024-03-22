@@ -152,35 +152,3 @@ def get_mass_mat(weight: np.ndarray):
         (VV[:marker], (II[:marker], JJ[:marker])), shape=(tot_dof, tot_dof)
     )
     return mass_mat
-
-
-if __name__ == "__main__":
-    from simple_flat_interface_settings import get_test_settings
-
-    # from scipy.sparse.linalg import spsolve
-    # The default sparse solver in scipy is superLU, with optional interfaces to UMFPACK.
-    # All those solvers are not parallelized.
-    # from scipy.sparse.linalg import spsolve
-    # Try to use the parallelized solver in the mkl library (Pardiso).
-    import pypardiso
-
-    spsolve = pypardiso.spsolve
-
-    sigma_pm_list = [[10.0, 1.0]]
-    fine_grid_list = [8, 16, 32, 64]
-    rela_errors = np.zeros((len(fine_grid_list), len(sigma_pm_list)))
-    for fine_grid_ind, sigma_pm_ind in product(
-        range(len(fine_grid_list)), range(len(sigma_pm_list))
-    ):
-        fine_grid = fine_grid_list[fine_grid_ind]
-        sigma_pm = sigma_pm_list[sigma_pm_ind]
-        coeff, source, u = get_test_settings(fine_grid, sigma_pm)
-        fem_mat = get_fem_mat(coeff)
-        rhs = get_fem_rhs(source)
-        fem_mat_abs = get_fem_mat(np.abs(coeff))
-        u_fem = spsolve(fem_mat, rhs)
-        delta_u = u - u_fem
-        u_nrm2 = np.sqrt(np.dot(fem_mat_abs.dot(u), u))
-        delta_u_nrm2 = np.sqrt(np.dot(fem_mat_abs.dot(delta_u), delta_u))
-        rela_errors[fine_grid_ind, sigma_pm_ind] = delta_u_nrm2 / u_nrm2
-    print(rela_errors)
