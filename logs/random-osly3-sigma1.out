@@ -1,0 +1,353 @@
+Sender: LSF System <lsfadmin@a1u08n03>
+Subject: Job 513213: <sav> in cluster <cluster1> Done
+
+Job <sav> was submitted from host <ln02> by user <cjz> in cluster <cluster1> at Fri Mar 22 18:57:49 2024
+Job was executed on host(s) <36*a1u08n03>, in queue <batch>, as user <cjz> in cluster <cluster1> at Fri Mar 22 18:57:41 2024
+</share/home/cjz> was used as the home directory.
+</share/home/cjz/cqye/sign-changing> was used as the working directory.
+Started at Fri Mar 22 18:57:41 2024
+Terminated at Sat Mar 23 07:54:40 2024
+Results reported at Sat Mar 23 07:54:40 2024
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#BSUB -J sav
+#BSUB -n 36
+#BSUB -o logs/%J.lsf.out
+#BSUB -e logs/%J.lsf.err
+#BSUB -W 1440
+#BSUB -q batch
+#BSUB -R "span[ptile=36]"
+
+cd ${LS_SUBCWD}
+# set OMP_NUM_THREADS _and_ export! 
+OMP_NUM_THREADS=$LSB_DJOB_NUMPROC 
+export OMP_NUM_THREADS
+
+python random_inclusion_settings.py --sigma 1
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :                                   374050.41 sec.
+    Max Memory :                                 11443 MB
+    Average Memory :                             6057.03 MB
+    Total Requested Memory :                     -
+    Delta Memory :                               -
+    Max Swap :                                   2 MB
+    Max Processes :                              4
+    Max Threads :                                40
+    Run time :                                   46619 sec.
+    Turnaround time :                            46611 sec.
+
+The output (if any) follows:
+
+2024-03-22 18:57:54	================================================================================
+2024-03-22 18:57:54	Start
+2024-03-22 18:57:54	In the medium, sigma-inc=-1.0000e+03, sigma-mat=1.0000e+00
+2024-03-22 18:58:10	CEM-GMsFEM uses fine_grid=400, coarse_grid=10, eigen_num=1, oversamp_layer=3
+2024-03-22 18:58:15	Finish getting the global stiffness matrix.
+2024-03-22 18:58:22	Finish getting all eigenvalue-vector pairs.
+2024-03-22 18:58:22	lambda_min=(1.2657e-14, 2.3981e-14), lambda_max=(1.2657e-14, 2.3981e-14)
+2024-03-22 18:58:23	Finish getting maps of [global node index] to [local freedom index].
+2024-03-22 19:09:05	......11.00%
+2024-03-22 19:20:19	......21.00%
+2024-03-22 19:33:22	......31.00%
+2024-03-22 19:48:16	......41.00%
+2024-03-22 20:02:52	......51.00%
+2024-03-22 20:17:45	......61.00%
+2024-03-22 20:32:15	......71.00%
+2024-03-22 20:44:45	......81.00%
+2024-03-22 20:55:15	......91.00%
+2024-03-22 21:02:44	Finish getting the multiscale bases.
+2024-03-22 21:02:46	Finish collecting all the bases in a sparse matrix formation.
+2024-03-22 21:02:47	Finish constructing the final MS mat.
+2024-03-22 21:02:48	relative energy error=1.271269e-01, plain-L2 error=1.469439e-02.
+2024-03-22 21:02:48	CEM-GMsFEM uses fine_grid=400, coarse_grid=10, eigen_num=2, oversamp_layer=3
+2024-03-22 21:02:53	Finish getting the global stiffness matrix.
+2024-03-22 21:03:00	Finish getting all eigenvalue-vector pairs.
+2024-03-22 21:03:00	lambda_min=(1.2212e-14, 2.4647e-14), lambda_max=(2.6850e-01, 4.3350e-01)
+2024-03-22 21:03:01	Finish getting maps of [global node index] to [local freedom index].
+2024-03-22 21:14:02	......11.00%
+2024-03-22 21:25:41	......21.00%
+2024-03-22 21:39:26	......31.00%
+2024-03-22 21:54:45	......41.00%
+2024-03-22 22:10:09	......51.00%
+2024-03-22 22:25:38	......61.00%
+2024-03-22 22:40:44	......71.00%
+2024-03-22 22:53:47	......81.00%
+2024-03-22 23:04:39	......91.00%
+2024-03-22 23:12:29	Finish getting the multiscale bases.
+2024-03-22 23:12:34	Finish collecting all the bases in a sparse matrix formation.
+2024-03-22 23:12:37	Finish constructing the final MS mat.
+2024-03-22 23:12:37	relative energy error=7.018714e-02, plain-L2 error=8.418196e-03.
+2024-03-22 23:12:37	CEM-GMsFEM uses fine_grid=400, coarse_grid=10, eigen_num=3, oversamp_layer=3
+2024-03-22 23:12:42	Finish getting the global stiffness matrix.
+2024-03-22 23:12:50	Finish getting all eigenvalue-vector pairs.
+2024-03-22 23:12:50	lambda_min=(1.1990e-14, 2.5313e-14), lambda_max=(3.7073e-01, 1.1414e+00)
+2024-03-22 23:12:51	Finish getting maps of [global node index] to [local freedom index].
+2024-03-22 23:24:15	......11.00%
+2024-03-22 23:36:20	......21.00%
+2024-03-22 23:50:27	......31.00%
+2024-03-23 00:06:25	......41.00%
+2024-03-23 00:22:27	......51.00%
+2024-03-23 00:38:28	......61.00%
+2024-03-23 00:54:15	......71.00%
+2024-03-23 01:07:40	......81.00%
+2024-03-23 01:18:53	......91.00%
+2024-03-23 01:26:59	Finish getting the multiscale bases.
+2024-03-23 01:27:06	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 01:27:12	Finish constructing the final MS mat.
+2024-03-23 01:27:13	relative energy error=2.835337e-02, plain-L2 error=1.946769e-03.
+2024-03-23 01:27:13	CEM-GMsFEM uses fine_grid=400, coarse_grid=10, eigen_num=4, oversamp_layer=3
+2024-03-23 01:27:18	Finish getting the global stiffness matrix.
+2024-03-23 01:27:26	Finish getting all eigenvalue-vector pairs.
+2024-03-23 01:27:26	lambda_min=(1.1102e-14, 2.4647e-14), lambda_max=(6.6938e-01, 1.5529e+00)
+2024-03-23 01:27:27	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 01:39:10	......11.00%
+2024-03-23 01:51:42	......21.00%
+2024-03-23 02:06:21	......31.00%
+2024-03-23 02:22:54	......41.00%
+2024-03-23 02:39:29	......51.00%
+2024-03-23 02:56:05	......61.00%
+2024-03-23 03:12:19	......71.00%
+2024-03-23 03:26:13	......81.00%
+2024-03-23 03:37:50	......91.00%
+2024-03-23 03:46:12	Finish getting the multiscale bases.
+2024-03-23 03:46:23	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 03:46:33	Finish constructing the final MS mat.
+2024-03-23 03:46:34	relative energy error=2.040378e-02, plain-L2 error=1.061191e-03.
+2024-03-23 03:46:34	CEM-GMsFEM uses fine_grid=400, coarse_grid=20, eigen_num=1, oversamp_layer=3
+2024-03-23 03:46:39	Finish getting the global stiffness matrix.
+2024-03-23 03:46:47	Finish getting all eigenvalue-vector pairs.
+2024-03-23 03:46:47	lambda_min=(1.9984e-15, 5.5511e-15), lambda_max=(1.9984e-15, 5.5511e-15)
+2024-03-23 03:46:48	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 03:49:40	......10.25%
+2024-03-23 03:53:33	......20.25%
+2024-03-23 03:57:41	......30.25%
+2024-03-23 04:01:50	......40.25%
+2024-03-23 04:05:59	......50.25%
+2024-03-23 04:10:07	......60.25%
+2024-03-23 04:14:14	......70.25%
+2024-03-23 04:18:23	......80.25%
+2024-03-23 04:22:10	......90.25%
+2024-03-23 04:24:46	Finish getting the multiscale bases.
+2024-03-23 04:24:49	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 04:24:50	Finish constructing the final MS mat.
+2024-03-23 04:24:51	relative energy error=3.102956e-01, plain-L2 error=5.598701e-02.
+2024-03-23 04:24:51	CEM-GMsFEM uses fine_grid=400, coarse_grid=20, eigen_num=2, oversamp_layer=3
+2024-03-23 04:24:56	Finish getting the global stiffness matrix.
+2024-03-23 04:25:03	Finish getting all eigenvalue-vector pairs.
+2024-03-23 04:25:03	lambda_min=(1.7764e-15, 5.9952e-15), lambda_max=(6.8562e-02, 4.1208e-01)
+2024-03-23 04:25:05	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 04:27:59	......10.25%
+2024-03-23 04:31:55	......20.25%
+2024-03-23 04:36:09	......30.25%
+2024-03-23 04:40:22	......40.25%
+2024-03-23 04:44:34	......50.25%
+2024-03-23 04:48:47	......60.25%
+2024-03-23 04:53:00	......70.25%
+2024-03-23 04:57:13	......80.25%
+2024-03-23 05:01:06	......90.25%
+2024-03-23 05:03:44	Finish getting the multiscale bases.
+2024-03-23 05:03:50	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 05:03:54	Finish constructing the final MS mat.
+2024-03-23 05:03:55	relative energy error=1.089336e-01, plain-L2 error=1.439756e-02.
+2024-03-23 05:03:55	CEM-GMsFEM uses fine_grid=400, coarse_grid=20, eigen_num=3, oversamp_layer=3
+2024-03-23 05:04:00	Finish getting the global stiffness matrix.
+2024-03-23 05:04:09	Finish getting all eigenvalue-vector pairs.
+2024-03-23 05:04:09	lambda_min=(1.5543e-15, 6.6613e-15), lambda_max=(3.2543e-01, 8.6961e-01)
+2024-03-23 05:04:10	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 05:07:05	......10.25%
+2024-03-23 05:11:03	......20.25%
+2024-03-23 05:15:17	......30.25%
+2024-03-23 05:19:32	......40.25%
+2024-03-23 05:23:46	......50.25%
+2024-03-23 05:28:00	......60.25%
+2024-03-23 05:32:15	......70.25%
+2024-03-23 05:36:30	......80.25%
+2024-03-23 05:40:24	......90.25%
+2024-03-23 05:43:04	Finish getting the multiscale bases.
+2024-03-23 05:43:13	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 05:43:21	Finish constructing the final MS mat.
+2024-03-23 05:43:22	relative energy error=1.418903e-02, plain-L2 error=6.480455e-04.
+2024-03-23 05:43:22	CEM-GMsFEM uses fine_grid=400, coarse_grid=20, eigen_num=4, oversamp_layer=3
+2024-03-23 05:43:27	Finish getting the global stiffness matrix.
+2024-03-23 05:43:36	Finish getting all eigenvalue-vector pairs.
+2024-03-23 05:43:36	lambda_min=(1.5543e-15, 6.8834e-15), lambda_max=(5.7334e-01, 1.2637e+00)
+2024-03-23 05:43:37	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 05:46:33	......10.25%
+2024-03-23 05:50:33	......20.25%
+2024-03-23 05:54:49	......30.25%
+2024-03-23 05:59:06	......40.25%
+2024-03-23 06:03:22	......50.25%
+2024-03-23 06:07:39	......60.25%
+2024-03-23 06:11:56	......70.25%
+2024-03-23 06:16:13	......80.25%
+2024-03-23 06:20:09	......90.25%
+2024-03-23 06:22:51	Finish getting the multiscale bases.
+2024-03-23 06:23:03	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 06:23:18	Finish constructing the final MS mat.
+2024-03-23 06:23:19	relative energy error=1.014426e-02, plain-L2 error=3.492934e-04.
+2024-03-23 06:23:19	CEM-GMsFEM uses fine_grid=400, coarse_grid=40, eigen_num=1, oversamp_layer=3
+2024-03-23 06:23:24	Finish getting the global stiffness matrix.
+2024-03-23 06:23:36	Finish getting all eigenvalue-vector pairs.
+2024-03-23 06:23:36	lambda_min=(-4.4409e-16, 2.4425e-15), lambda_max=(-4.4409e-16, 2.4425e-15)
+2024-03-23 06:23:37	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 06:24:45	......10.06%
+2024-03-23 06:26:09	......20.06%
+2024-03-23 06:27:33	......30.06%
+2024-03-23 06:28:56	......40.06%
+2024-03-23 06:30:20	......50.06%
+2024-03-23 06:31:44	......60.06%
+2024-03-23 06:33:08	......70.06%
+2024-03-23 06:34:32	......80.06%
+2024-03-23 06:35:57	......90.06%
+2024-03-23 06:37:03	Finish getting the multiscale bases.
+2024-03-23 06:37:07	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 06:37:08	Finish constructing the final MS mat.
+2024-03-23 06:37:09	relative energy error=1.609778e+00, plain-L2 error=9.222162e-01.
+2024-03-23 06:37:09	CEM-GMsFEM uses fine_grid=400, coarse_grid=40, eigen_num=2, oversamp_layer=3
+2024-03-23 06:37:14	Finish getting the global stiffness matrix.
+2024-03-23 06:37:27	Finish getting all eigenvalue-vector pairs.
+2024-03-23 06:37:27	lambda_min=(-1.7764e-15, 2.6645e-15), lambda_max=(1.3648e-01, 6.5015e-01)
+2024-03-23 06:37:28	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 06:38:38	......10.06%
+2024-03-23 06:40:04	......20.06%
+2024-03-23 06:41:30	......30.06%
+2024-03-23 06:42:57	......40.06%
+2024-03-23 06:44:23	......50.06%
+2024-03-23 06:45:49	......60.06%
+2024-03-23 06:47:15	......70.06%
+2024-03-23 06:48:42	......80.06%
+2024-03-23 06:50:09	......90.06%
+2024-03-23 06:51:17	Finish getting the multiscale bases.
+2024-03-23 06:51:23	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 06:51:27	Finish constructing the final MS mat.
+2024-03-23 06:51:28	relative energy error=1.380926e-01, plain-L2 error=1.985738e-02.
+2024-03-23 06:51:28	CEM-GMsFEM uses fine_grid=400, coarse_grid=40, eigen_num=3, oversamp_layer=3
+2024-03-23 06:51:33	Finish getting the global stiffness matrix.
+2024-03-23 06:51:51	Finish getting all eigenvalue-vector pairs.
+2024-03-23 06:51:51	lambda_min=(-2.2204e-15, 2.8866e-15), lambda_max=(3.2921e-01, 7.8659e-01)
+2024-03-23 06:51:52	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 06:53:02	......10.06%
+2024-03-23 06:54:29	......20.06%
+2024-03-23 06:55:56	......30.06%
+2024-03-23 06:57:22	......40.06%
+2024-03-23 06:58:49	......50.06%
+2024-03-23 07:00:16	......60.06%
+2024-03-23 07:01:43	......70.06%
+2024-03-23 07:03:10	......80.06%
+2024-03-23 07:04:37	......90.06%
+2024-03-23 07:05:45	Finish getting the multiscale bases.
+2024-03-23 07:05:54	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 07:06:02	Finish constructing the final MS mat.
+2024-03-23 07:06:03	relative energy error=1.299174e-02, plain-L2 error=1.648273e-04.
+2024-03-23 07:06:03	CEM-GMsFEM uses fine_grid=400, coarse_grid=40, eigen_num=4, oversamp_layer=3
+2024-03-23 07:06:08	Finish getting the global stiffness matrix.
+2024-03-23 07:06:26	Finish getting all eigenvalue-vector pairs.
+2024-03-23 07:06:26	lambda_min=(-1.9984e-15, 2.8866e-15), lambda_max=(5.7628e-01, 1.2995e+00)
+2024-03-23 07:06:28	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 07:07:38	......10.06%
+2024-03-23 07:09:05	......20.06%
+2024-03-23 07:10:33	......30.06%
+2024-03-23 07:12:00	......40.06%
+2024-03-23 07:13:28	......50.06%
+2024-03-23 07:14:55	......60.06%
+2024-03-23 07:16:22	......70.06%
+2024-03-23 07:17:50	......80.06%
+2024-03-23 07:19:18	......90.06%
+2024-03-23 07:20:27	Finish getting the multiscale bases.
+2024-03-23 07:20:39	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 07:20:54	Finish constructing the final MS mat.
+2024-03-23 07:20:55	relative energy error=1.114853e-02, plain-L2 error=1.289067e-04.
+2024-03-23 07:20:55	CEM-GMsFEM uses fine_grid=400, coarse_grid=80, eigen_num=1, oversamp_layer=3
+2024-03-23 07:21:00	Finish getting the global stiffness matrix.
+2024-03-23 07:21:30	Finish getting all eigenvalue-vector pairs.
+2024-03-23 07:21:30	lambda_min=(-6.6613e-16, 1.3323e-15), lambda_max=(-6.6613e-16, 1.3323e-15)
+2024-03-23 07:21:32	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 07:22:09	......10.02%
+2024-03-23 07:22:50	......20.02%
+2024-03-23 07:23:31	......30.02%
+2024-03-23 07:24:12	......40.02%
+2024-03-23 07:24:53	......50.02%
+2024-03-23 07:25:34	......60.02%
+2024-03-23 07:26:15	......70.02%
+2024-03-23 07:26:56	......80.02%
+2024-03-23 07:27:38	......90.02%
+2024-03-23 07:28:14	Finish getting the multiscale bases.
+2024-03-23 07:28:18	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 07:28:19	Finish constructing the final MS mat.
+2024-03-23 07:28:20	relative energy error=8.276960e+02, plain-L2 error=2.642138e+02.
+2024-03-23 07:28:20	CEM-GMsFEM uses fine_grid=400, coarse_grid=80, eigen_num=2, oversamp_layer=3
+2024-03-23 07:28:25	Finish getting the global stiffness matrix.
+2024-03-23 07:29:09	Finish getting all eigenvalue-vector pairs.
+2024-03-23 07:29:09	lambda_min=(-1.7764e-15, 2.4425e-15), lambda_max=(1.0515e-01, 6.7548e-01)
+2024-03-23 07:29:11	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 07:29:53	......10.02%
+2024-03-23 07:30:39	......20.02%
+2024-03-23 07:31:25	......30.02%
+2024-03-23 07:32:11	......40.02%
+2024-03-23 07:32:57	......50.02%
+2024-03-23 07:33:43	......60.02%
+2024-03-23 07:34:29	......70.02%
+2024-03-23 07:35:15	......80.02%
+2024-03-23 07:36:02	......90.02%
+2024-03-23 07:36:43	Finish getting the multiscale bases.
+2024-03-23 07:36:50	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 07:36:54	Finish constructing the final MS mat.
+2024-03-23 07:36:55	relative energy error=3.500773e-01, plain-L2 error=1.061790e-01.
+2024-03-23 07:36:55	CEM-GMsFEM uses fine_grid=400, coarse_grid=80, eigen_num=3, oversamp_layer=3
+2024-03-23 07:37:00	Finish getting the global stiffness matrix.
+2024-03-23 07:37:44	Finish getting all eigenvalue-vector pairs.
+2024-03-23 07:37:44	lambda_min=(-1.9984e-15, 2.6645e-15), lambda_max=(3.2552e-01, 8.4987e-01)
+2024-03-23 07:37:46	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 07:38:28	......10.02%
+2024-03-23 07:39:14	......20.02%
+2024-03-23 07:40:01	......30.02%
+2024-03-23 07:40:47	......40.02%
+2024-03-23 07:41:33	......50.02%
+2024-03-23 07:42:20	......60.02%
+2024-03-23 07:43:06	......70.02%
+2024-03-23 07:43:53	......80.02%
+2024-03-23 07:44:40	......90.02%
+2024-03-23 07:45:21	Finish getting the multiscale bases.
+2024-03-23 07:45:31	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 07:45:39	Finish constructing the final MS mat.
+2024-03-23 07:45:42	relative energy error=3.066748e-02, plain-L2 error=8.648049e-04.
+2024-03-23 07:45:42	CEM-GMsFEM uses fine_grid=400, coarse_grid=80, eigen_num=4, oversamp_layer=3
+2024-03-23 07:45:47	Finish getting the global stiffness matrix.
+2024-03-23 07:46:29	Finish getting all eigenvalue-vector pairs.
+2024-03-23 07:46:29	lambda_min=(-1.5543e-15, 2.2204e-15), lambda_max=(5.2282e-01, 1.3504e+00)
+2024-03-23 07:46:31	Finish getting maps of [global node index] to [local freedom index].
+2024-03-23 07:47:13	......10.02%
+2024-03-23 07:48:00	......20.02%
+2024-03-23 07:48:47	......30.02%
+2024-03-23 07:49:33	......40.02%
+2024-03-23 07:50:20	......50.02%
+2024-03-23 07:51:07	......60.02%
+2024-03-23 07:51:54	......70.02%
+2024-03-23 07:52:41	......80.02%
+2024-03-23 07:53:28	......90.02%
+2024-03-23 07:54:10	Finish getting the multiscale bases.
+2024-03-23 07:54:22	Finish collecting all the bases in a sparse matrix formation.
+2024-03-23 07:54:36	Finish constructing the final MS mat.
+2024-03-23 07:54:39	relative energy error=2.920866e-02, plain-L2 error=8.894936e-04.
+[[1.27126855e-01 7.01871365e-02 2.83533654e-02 2.04037845e-02]
+ [3.10295641e-01 1.08933625e-01 1.41890318e-02 1.01442559e-02]
+ [1.60977796e+00 1.38092639e-01 1.29917418e-02 1.11485321e-02]
+ [8.27695992e+02 3.50077317e-01 3.06674783e-02 2.92086638e-02]]
+[[1.46943948e-02 8.41819562e-03 1.94676926e-03 1.06119050e-03]
+ [5.59870139e-02 1.43975593e-02 6.48045510e-04 3.49293380e-04]
+ [9.22216181e-01 1.98573797e-02 1.64827266e-04 1.28906738e-04]
+ [2.64213823e+02 1.06178957e-01 8.64804866e-04 8.89493553e-04]]
+
+
+PS:
+
+Read file <logs/513213.lsf.err> for stderr output of this job.
+
